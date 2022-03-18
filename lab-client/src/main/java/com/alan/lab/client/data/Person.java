@@ -4,16 +4,11 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Optional;
 
 
 public class Person implements Serializable, Comparable<Person> {
     private static final int MAX = 49;
     private static final int MIN = 6;
-    private static Long idIterator = 0L;
-    private static HashSet<Long> hashSetId = new HashSet<>();
-    private static HashSet<String> passportIDs = new HashSet<String>();
     private Long id; //Поле не может быть null, Значение поля должно быть больше 0, Значение этого поля должно быть уникальным, Значение этого поля должно генерироваться автоматически
     private String name; //Поле не может быть null, Строка не может быть пустой
     private Coordinates coordinates; //Поле не может быть null
@@ -31,11 +26,6 @@ public class Person implements Serializable, Comparable<Person> {
                   @NotNull String passportID,
                   Color hairColor,
                   Location location) throws Exception {
-        while (hashSetId.contains(idIterator)) {
-            idIterator++;
-        }
-        this.id = idIterator;
-        hashSetId.add(idIterator);
         if (name.length() == 0) {
             throw new Exception("name.length()==0");
         }
@@ -44,18 +34,11 @@ public class Person implements Serializable, Comparable<Person> {
         this.creationDate = java.time.LocalDateTime.now();
         if (height != null) {
             if (height <= 0) {
-                throw new Exception("name.length()==0");
+                throw new Exception("height<=0");
             }
         }
         this.height = height;
         this.birthday = birthday;
-        if (passportIDs.contains(passportID)) {
-            throw new Exception("contains passportID");
-        }
-        if (passportID.length() >= MAX || passportID.length() <= MIN) {
-            throw new Exception("passportID.length()>=49 || passportID.length()<=6");
-        }
-        passportIDs.add(passportID);
         this.passportID = passportID;
         this.hairColor = hairColor;
         this.location = location;
@@ -69,9 +52,8 @@ public class Person implements Serializable, Comparable<Person> {
     public Long getId() {
         return id;
     }
-
-    public Coordinates getCoordinates() {
-        return coordinates;
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public Float getHeight() {

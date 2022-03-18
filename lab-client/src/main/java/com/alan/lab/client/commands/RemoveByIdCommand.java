@@ -1,9 +1,10 @@
 package com.alan.lab.client.commands;
 
 
+import com.alan.lab.client.data.Person;
 import com.alan.lab.client.utility.CollectionManager;
 
-import java.util.Objects;
+import java.util.Optional;
 
 
 public class RemoveByIdCommand extends Command {
@@ -23,11 +24,12 @@ public class RemoveByIdCommand extends Command {
             return new CommandResult(false, "Your argument was incorrect. The command was not executed.");
         }
 
-
-        if (collectionManager.getMainData().removeIf(x -> Objects.equals(x.getId(), longArg))) {
-            return new CommandResult(false, "The element was deleted successfully.");
-        } else {
-            return new CommandResult(false, "Could not find written id. The command was not executed");
+        Optional<Person> optionalPerson = collectionManager.getMainData().stream().filter(x -> x.getId().equals(longArg)).findAny();
+        if (optionalPerson.isPresent()) {
+            collectionManager.delete(optionalPerson.get());
+            return new CommandResult(false, "success delete");
         }
+        return new CommandResult(false, "not person with id");
+
     }
 }

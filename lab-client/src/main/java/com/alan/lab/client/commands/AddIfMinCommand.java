@@ -29,13 +29,13 @@ public class AddIfMinCommand extends Command {
             Person person = AddElem.add(arg);
             if (person != null) {
                 Integer errcode = collectionManager.add(person);
-                if(errcode == 0) {
+                if (errcode == 0) {
                     return new CommandResult(false, "The element was added successfully");
                 }
                 if (errcode == 1) {
                     return new CommandResult(false, "not unique id");
                 }
-                return  new CommandResult(false, "not unique passwordId");
+                return new CommandResult(false, "not unique passwordId");
             }
         }
         return new CommandResult(false, "The element was not min, so it was not added");
