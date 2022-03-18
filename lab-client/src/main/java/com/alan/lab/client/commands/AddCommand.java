@@ -30,10 +30,10 @@ public class AddCommand extends Command {
                 return new CommandResult(false, "The element was added successfully");
             }
             if (errCode == 1) {
-                return new CommandResult(false, "not unique id");
+                return new CommandResult(false, "passportId len");
             }
             return new CommandResult(false, "not unique passportId");
         }
-        return new CommandResult(false, "bat arg");
+        return new CommandResult(false, "bad arg");
     }
 }

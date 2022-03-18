@@ -40,7 +40,10 @@ public class CollectionManager {
 
     public int add(Person person) {
 
-        if (passwordIds.contains(person.getPassportID()) || person.getPassportID().length() >= MAX || person.getPassportID().length() <= MIN) {
+        if (person.getPassportID().length() >= MAX || person.getPassportID().length() <= MIN) {
+            return 1;
+        }
+        if (passwordIds.contains(person.getPassportID())) {
             return 2;
         }
         while (ids.contains(iterId)) {

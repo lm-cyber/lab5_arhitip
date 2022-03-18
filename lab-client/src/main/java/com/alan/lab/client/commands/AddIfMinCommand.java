@@ -33,7 +33,7 @@ public class AddIfMinCommand extends Command {
                     return new CommandResult(false, "The element was added successfully");
                 }
                 if (errcode == 1) {
-                    return new CommandResult(false, "not unique id");
+                    return new CommandResult(false, "passwordId len");
                 }
                 return new CommandResult(false, "not unique passwordId");
             }
