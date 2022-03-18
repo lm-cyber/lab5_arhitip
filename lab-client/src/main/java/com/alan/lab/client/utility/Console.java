@@ -30,9 +30,6 @@ public class Console {
         this.commandRunManager = commandRunManager;
     }
 
-    /**
-     * Loads data into fileManager.mainData (a TreeSet) and starts listening to user command input
-     */
     public void start() throws IllegalArgumentException, JsonSyntaxException, IOException {
         String stringData = fileManager.read();
 
