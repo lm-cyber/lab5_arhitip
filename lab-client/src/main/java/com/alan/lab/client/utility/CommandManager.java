@@ -42,7 +42,7 @@ public class CommandManager {
         commands.add(new FilterGreaterThanHeightCommand(collectionManager));
         commands.add(new PrintDescendingCommand(collectionManager));
         commands.add(new InfoCommand(collectionManager));
-        commands.add(new ExitCommand());
+        commands.add(new ExitCommand(userInputManager));
         commands.add(new HistoryCommand(historyManager));
         commands.add(new AverageOfHeightCommand(collectionManager));
         commands.add(new RemoveHeadCommand(collectionManager, outputManager));

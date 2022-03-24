@@ -1,6 +1,7 @@
 package com.alan.lab.client.utility;
 
 import com.alan.lab.client.data.Color;
+import com.alan.lab.client.exceptions.DoubleExecuteException;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -133,12 +134,17 @@ public class UserInputManager {
 
     public void connectToFile(File file) throws IOException, UnsupportedOperationException {
         if (currentFiles.contains(file)) {
-            throw new UnsupportedOperationException("The file was not executed due to recursion");
+            scanner.close();
+            throw new DoubleExecuteException();
         } else {
             BufferedReader newReader = new BufferedReader(new FileReader(file));
             currentFiles.push(file);
             currentFilesReaders.push(newReader);
         }
+    }
+
+    public void close() {
+        scanner.close();
     }
 
 }

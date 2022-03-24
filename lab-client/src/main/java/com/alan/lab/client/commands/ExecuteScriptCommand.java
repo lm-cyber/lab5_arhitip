@@ -1,10 +1,12 @@
 package com.alan.lab.client.commands;
 
 
+import com.alan.lab.client.exceptions.DoubleExecuteException;
 import com.alan.lab.client.utility.UserInputManager;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.zip.DataFormatException;
 
 public class ExecuteScriptCommand extends Command {
 
@@ -22,7 +24,7 @@ public class ExecuteScriptCommand extends Command {
             return new CommandResult(false, "Starting to execute script...");
         } catch (IOException e) {
             return new CommandResult(false, "There was a problem opening the file. Check if it is available and you have written it in the command arg correctly.");
-        } catch (UnsupportedOperationException e) {
+        } catch (DoubleExecuteException e) {
             return new CommandResult(false, e.getMessage());
         }
     }

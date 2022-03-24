@@ -1,5 +1,10 @@
 help
 info
 show
-exit
-
+average_of_height
+filter_greater_than_height 1
+history
+print_descending
+remove_by_id 1
+remove_head
+execute_script script1
