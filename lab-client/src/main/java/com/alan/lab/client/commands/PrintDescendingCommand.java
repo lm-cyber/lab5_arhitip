@@ -3,7 +3,6 @@ package com.alan.lab.client.commands;
 
 import com.alan.lab.client.utility.CollectionManager;
 
-import java.util.stream.Collectors;
 
 
 public class PrintDescendingCommand extends Command {
@@ -17,6 +16,6 @@ public class PrintDescendingCommand extends Command {
 
     @Override
     public CommandResult execute(String arg) {
-        return new CommandResult(false, collectionManager.getMainData().stream().sorted().collect(Collectors.toList()).toString());
+        return new CommandResult(false, collectionManager.descending().toString());
     }
 }

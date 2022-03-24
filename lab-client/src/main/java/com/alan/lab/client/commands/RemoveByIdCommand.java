@@ -17,17 +17,14 @@ public class RemoveByIdCommand extends Command {
 
     @Override
     public CommandResult execute(String arg) {
-        Long longArg;
+        Long id;
         try {
-            longArg = Long.parseLong(arg);
+            id = Long.parseLong(arg);
         } catch (NumberFormatException e) {
             return new CommandResult(false, "Your argument was incorrect. The command was not executed.");
         }
-
-        Optional<Person> optionalPerson = collectionManager.getMainData().stream().filter(x -> x.getId().equals(longArg)).findAny();
-        if (optionalPerson.isPresent()) {
-            collectionManager.delete(optionalPerson.get());
-            return new CommandResult(false, "success delete");
+        if (collectionManager.removeByID(id)) {
+            return new CommandResult(false, "remove success");
         }
         return new CommandResult(false, "not person with id");
 

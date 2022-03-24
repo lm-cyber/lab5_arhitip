@@ -40,7 +40,7 @@ public class Console {
     }
 
     private String[] parseToNameAndArg(String input) {
-        String[] arrayInput = input.split(" ", 2);
+        String[] arrayInput = input.split(" ");
         String inputCommand = arrayInput[0];
         String inputArg = "";
 
@@ -70,7 +70,7 @@ public class Console {
                 arg = commandNameAndArg[1];
             }
             try {
-            commandResult = commandRunManager.runCommand(name, arg);
+                commandResult = commandRunManager.runCommand(name, arg);
             } catch (Exception e) {
                 commandResult = new CommandResult(false, e.getMessage() + " something bad,try ");
 

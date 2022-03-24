@@ -1,31 +1,50 @@
 package com.alan.lab.client.data;
 
-import org.jetbrains.annotations.NotNull;
+import com.alan.lab.client.exceptions.InvalidValuesException;
+import lombok.NonNull;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Coordinates {
     private static final Float MINX = -601F;
     private static final Float MINY = -904F;
     private float x; //Значение поля должно быть больше -601
+    @NonNull
     private Float y; //Значение поля должно быть больше -904, Поле не может быть null
 
-    public Coordinates(float x, @NotNull Float y) throws Exception {
-        if (x <= MINX) {
-            throw new Exception("x<=-601");
+    public class CoordinatesBuilder {
+        public CoordinatesBuilder x(Float x) throws InvalidValuesException {
+            if (x <= MINX) {
+                throw new InvalidValuesException("x<+" + MINX.toString());
+            }
+            Coordinates.this.x = x;
+            return this;
         }
-        if (y <= MINY) {
-            throw new Exception("y<=-904");
+
+        public CoordinatesBuilder y(Float y) throws InvalidValuesException {
+            if (y <= MINY) {
+                throw new InvalidValuesException("y<+" + MINY.toString());
+            }
+            Coordinates.this.y = y;
+            return this;
         }
-        this.x = x;
-        this.y = y;
 
+        public Coordinates build() {
+            return Coordinates.this;
+        }
+    }
 
+    public static CoordinatesBuilder builder() {
+        return new Coordinates().new CoordinatesBuilder();
     }
 
     @Override
     public String toString() {
-        return "Coordinates{"
-                + "\n\t\t x=" + x
-                + "\n\t\t y=" + y
-                + "\n\t}";
+        return "\n\tx=" + x +
+                "\n\ty=" + y + "\n";
     }
 }

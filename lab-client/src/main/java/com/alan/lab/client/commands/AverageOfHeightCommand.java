@@ -15,11 +15,6 @@ public class AverageOfHeightCommand extends Command {
 
     @Override
     public CommandResult execute(String arg) {
-        OptionalDouble average = collectionManager.getMainData().stream()
-                .map(Person::getHeight)
-                .mapToDouble(value -> value)
-                .average();
-        Double d = average.orElse(0D);
-        return new CommandResult(false, d.toString());
+        return new CommandResult(false, collectionManager.averageHeight().toString());
     }
 }

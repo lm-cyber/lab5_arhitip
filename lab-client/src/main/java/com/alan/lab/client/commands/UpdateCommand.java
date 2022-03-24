@@ -1,24 +1,16 @@
 package com.alan.lab.client.commands;
 
+import com.alan.lab.client.commands.subcommands.AddElem;
 import com.alan.lab.client.data.Person;
+import com.alan.lab.client.exceptions.InvalidEmptyLineException;
+import com.alan.lab.client.exceptions.InvalidPassportIDSizeException;
+import com.alan.lab.client.exceptions.InvalidValuesException;
+import com.alan.lab.client.exceptions.PasswordIDContainsException;
 import com.alan.lab.client.utility.CollectionManager;
 import com.alan.lab.client.utility.OutputManager;
 import com.alan.lab.client.utility.UserInputManager;
 
-import java.util.Objects;
-import java.util.Optional;
-
 public class UpdateCommand extends Command {
-    private static final int K3 = 3;
-    private static final int K4 = 4;
-    private static final int K5 = 5;
-    private static final int K6 = 6;
-    private static final int K7 = 7;
-    private static final int K8 = 8;
-    private static final int K9 = 9;
-    private static final int K10 = 10;
-
-
     private final OutputManager outputManager;
     private final UserInputManager userInputManager;
     private final CollectionManager collectionManager;
@@ -32,19 +24,26 @@ public class UpdateCommand extends Command {
 
     @Override
     public CommandResult execute(String arg) {
-        String[] lines = arg.split(" ", 2);
-        Long argLong;
+            Long id;
         try {
-            argLong = Long.parseLong(lines[0]);
+            id = Long.parseLong(arg);
         } catch (NumberFormatException e) {
             return new CommandResult(false, "Your argument was incorrect. The command was not executed.");
         }
-        Optional<Person> any = collectionManager.getMainData().stream().filter(person -> Objects.equals(person.getId(), argLong)).findAny();
-        if (any.isPresent()) {
-            any.get().update();
-            return new CommandResult(false, "The element was updated successfully");
+        if(!collectionManager.isHaveId(id)) {
+            return new CommandResult(false, "have not this id");
         }
-        return new CommandResult(false, "Written id was not found. The command was not executed");
+        Person person;
+        try {
+            person = AddElem.add(false, userInputManager, outputManager, collectionManager);
+            person.setId(id);
+            collectionManager.removeByID(id);
+            collectionManager.add(person);
+            return new CommandResult(false, "success added");
+        } catch (InvalidValuesException | PasswordIDContainsException | InvalidPassportIDSizeException | InvalidEmptyLineException e) {
+            return new CommandResult(false, "not success:" + e.getMessage());
+        }
+
     }
 
 }

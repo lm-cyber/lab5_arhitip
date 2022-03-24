@@ -45,7 +45,7 @@ public class CommandManager {
         commands.add(new ExitCommand());
         commands.add(new HistoryCommand(historyManager));
         commands.add(new AverageOfHeightCommand(collectionManager));
-        commands.add(new RemoveHeadCommand(collectionManager));
+        commands.add(new RemoveHeadCommand(collectionManager, outputManager));
     }
 
     public HashSet<Command> getCommands() {

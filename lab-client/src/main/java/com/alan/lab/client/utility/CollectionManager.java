@@ -1,15 +1,14 @@
 package com.alan.lab.client.utility;
 
 import com.alan.lab.client.data.Person;
+import com.alan.lab.client.exceptions.NotMinException;
+import com.alan.lab.client.exceptions.PasswordIDContainsException;
 
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.PriorityQueue;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class CollectionManager {
-    private static final int MAX = 49;
-    private static final int MIN = 6;
     private PriorityQueue<Person> mainData = new PriorityQueue<>();
     private final LocalDate creationDate = LocalDate.now();
     private HashSet<Long> ids = new HashSet<>();
@@ -24,9 +23,6 @@ public class CollectionManager {
         }
     }
 
-    public PriorityQueue<Person> getMainData() {
-        return mainData;
-    }
 
     public void clear() {
         ids.clear();
@@ -38,33 +34,93 @@ public class CollectionManager {
         return creationDate;
     }
 
-    public int add(Person person) {
+    public Integer getSize() {
+        return mainData.size();
+    }
 
-        if (person.getPassportID().length() >= MAX || person.getPassportID().length() <= MIN) {
-            return 1;
-        }
-        if (passwordIds.contains(person.getPassportID())) {
-            return 2;
-        }
+    public Class getType() {
+        return mainData.getClass();
+    }
+
+    public PriorityQueue<Person> getMainData() {
+        return mainData;
+    }
+
+    public Long getNewID() {
         while (ids.contains(iterId)) {
             iterId++;
         }
-        person.setId(iterId);
+        return iterId;
+    }
+
+    public void addMin(Person person) throws PasswordIDContainsException, NotMinException {
+        if (getMinHeight() > person.getHeight()) {
+            add(person);
+        } else {
+            throw new NotMinException();
+        }
+    }
+
+    public void add(Person person) throws PasswordIDContainsException {
+
+        if (passwordIds.contains(person.getPassportID())) {
+            throw new PasswordIDContainsException();
+        }
         ids.add(person.getId());
         passwordIds.add(person.getPassportID());
         mainData.add(person);
-        return 0;
     }
 
-    public void delete(Person person) {
-        ids.remove(person.getId());
-        passwordIds.remove(person.getPassportID());
-        mainData.remove(person);
+    public boolean removeByID(Long id) {
+        if (mainData.stream().anyMatch(x -> x.getId().equals(id))) {
+            Person person = mainData.stream().filter(x ->x.getId().equals(id)).findAny().get();
+            passwordIds.remove(person.getPassportID());
+            mainData.remove(person);
+            removeId(id);
+            return true;
+        }
+        return false;
     }
 
-    public Long getMinId() {
-        Optional<Long> optionHeight = mainData.stream().map(Person::getId).min(Long::compare);
-        return optionHeight.orElse(0L);
+    public Double averageHeight() {
+        OptionalDouble average = mainData.stream()
+                .map(Person::getHeight)
+                .mapToDouble(value -> value)
+                .average();
+        return average.orElse(0D);
+    }
 
+    public void removeId(Long id) {
+        ids.remove(id);
+    }
+    public boolean isHaveId(Long id) {
+        return mainData.stream().anyMatch((x -> x.getId().equals(id)));
+    }
+
+    public boolean isEmpty() {
+        return mainData.isEmpty();
+    }
+
+    public Person poll() {
+        return mainData.poll();
+    }
+
+    public Float getMinHeight() {
+        Optional<Float> optionHeight = mainData.stream().map(Person::getHeight).min(Float::compare);
+        return optionHeight.orElse(0F);
+
+    }
+
+    public List<Person> descending() {
+        return this.mainData.stream().sorted().collect(Collectors.toList());
+    }
+
+    public List<Person> filterGreaterThanHeight(Float height) {
+        return this.mainData.stream().filter(person -> person.getHeight() > height).collect(Collectors.toList());
+    }
+
+    @Override
+    public String toString() {
+        return mainData.toString();
     }
 }

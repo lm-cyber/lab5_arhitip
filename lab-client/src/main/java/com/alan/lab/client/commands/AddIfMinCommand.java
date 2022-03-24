@@ -2,11 +2,15 @@ package com.alan.lab.client.commands;
 
 import com.alan.lab.client.commands.subcommands.AddElem;
 import com.alan.lab.client.data.Person;
+import com.alan.lab.client.exceptions.InvalidEmptyLineException;
+import com.alan.lab.client.exceptions.InvalidPassportIDSizeException;
+import com.alan.lab.client.exceptions.InvalidValuesException;
+import com.alan.lab.client.exceptions.PasswordIDContainsException;
+import com.alan.lab.client.exceptions.NotMinException;
 import com.alan.lab.client.utility.CollectionManager;
 import com.alan.lab.client.utility.OutputManager;
 import com.alan.lab.client.utility.UserInputManager;
 
-import java.util.Optional;
 
 
 public class AddIfMinCommand extends Command {
@@ -23,21 +27,14 @@ public class AddIfMinCommand extends Command {
 
     @Override
     public CommandResult execute(String arg) {
-        String[] lines = arg.split(" ", 2);
-        Optional<Float> optionHeight = collectionManager.getMainData().stream().map(Person::getHeight).min(Float::compare);
-        if (optionHeight.orElse(0F) < Float.parseFloat(lines[0])) {
-            Person person = AddElem.add(arg);
-            if (person != null) {
-                Integer errcode = collectionManager.add(person);
-                if (errcode == 0) {
-                    return new CommandResult(false, "The element was added successfully");
-                }
-                if (errcode == 1) {
-                    return new CommandResult(false, "passwordId len");
-                }
-                return new CommandResult(false, "not unique passwordId");
-            }
+        Person person;
+        try {
+            person = AddElem.add(true, userInputManager, outputManager, collectionManager);
+            collectionManager.addMin(person);
+            return new CommandResult(false, "success added");
+        } catch (InvalidValuesException | PasswordIDContainsException | InvalidPassportIDSizeException | InvalidEmptyLineException | NotMinException e) {
+            return new CommandResult(false, "not success:" + e.getMessage());
         }
-        return new CommandResult(false, "The element was not min, so it was not added");
+
     }
 }

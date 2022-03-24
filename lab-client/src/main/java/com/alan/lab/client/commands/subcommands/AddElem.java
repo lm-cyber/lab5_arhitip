@@ -1,44 +1,45 @@
 package com.alan.lab.client.commands.subcommands;
 
-import com.alan.lab.client.data.Color;
 import com.alan.lab.client.data.Coordinates;
 import com.alan.lab.client.data.Location;
 import com.alan.lab.client.data.Person;
-
-import java.time.LocalDateTime;
+import com.alan.lab.client.exceptions.InvalidEmptyLineException;
+import com.alan.lab.client.exceptions.InvalidPassportIDSizeException;
+import com.alan.lab.client.exceptions.InvalidValuesException;
+import com.alan.lab.client.utility.CollectionManager;
+import com.alan.lab.client.utility.OutputManager;
+import com.alan.lab.client.utility.UserInputManager;
 
 public final class AddElem {
-    private static final int K3 = 3;
-    private static final int K4 = 4;
-    private static final int K5 = 5;
-    private static final int K6 = 6;
-    private static final int K7 = 7;
-    private static final int K8 = 8;
-    private static final int K9 = 9;
-
     private AddElem() {
     }
 
-    public static Person add(String arg) {
-        String[] lines = arg.split(" ");
-        try {
-
-
-            String name = lines[0];
-            Float coordinatesX = Float.parseFloat(lines[1]);
-            Float coordinatesY = Float.parseFloat(lines[2]);
-            Coordinates coordinates = new Coordinates(coordinatesX, coordinatesY);
-            Float height = Float.parseFloat(lines[K3]);
-            LocalDateTime birthday = LocalDateTime.parse(lines[K4]);
-            String passportID = lines[K5];
-            Color hairColor = Color.valueOf(lines[K6]);
-            Double locationX = Double.parseDouble(lines[K7]);
-            Integer locationY = Integer.parseInt(lines[K8]);
-            Long locationZ = Long.parseLong(lines[K9]);
-            Location location = new Location(locationX, locationY, locationZ);
-            return new Person(name, coordinates, height, birthday, passportID, hairColor, location);
-        } catch (Exception e) {
-            return null;
+    public static Person add(boolean newID, UserInputManager userInputManager, OutputManager outputManager, CollectionManager collectionManager) throws InvalidValuesException, InvalidEmptyLineException, InvalidPassportIDSizeException {
+        Coordinates.CoordinatesBuilder coordinatesBuilder = Coordinates.builder();
+        Person.PersonBuilder personBuilder = Person.builder();
+        Location.LocationBuilder locationBuilder = Location.builder();
+        locationBuilder.z(userInputManager.readLongValue("locationZ(Long)", outputManager));
+        locationBuilder.x(userInputManager.readDoubleValue("locationX(Double)", outputManager));
+        locationBuilder.y(userInputManager.readIntegerValue("locationY(Integer)", outputManager));
+        coordinatesBuilder.x(userInputManager.readFloatValue("coordinatesX(Float)", outputManager));
+        coordinatesBuilder.y(userInputManager.readFloatValue("coordinatesY(Float)", outputManager));
+        personBuilder.location(locationBuilder.build());
+        personBuilder.coordinates(coordinatesBuilder.build());
+        personBuilder.height(userInputManager.readFloatValue("height(Float)", outputManager));
+        outputManager.println("enter name: ");
+        personBuilder.name(userInputManager.nextLine());
+        personBuilder.hairColor(userInputManager.readHairColorValue(" RED or GREEN or ORANGE", outputManager));
+        if (newID) {
+            personBuilder.id(collectionManager.getNewID());
+        } else {
+            personBuilder.id(0L);
         }
+        personBuilder.creationDate();
+        personBuilder.birthday(userInputManager.readBirthdayValue("birthday patern\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}", outputManager));
+        outputManager.println("enter PassportID: ");
+        personBuilder.passportID(userInputManager.nextLine());
+        return personBuilder.build();
+
     }
+
 }

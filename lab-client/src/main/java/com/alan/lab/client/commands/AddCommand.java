@@ -3,6 +3,10 @@ package com.alan.lab.client.commands;
 
 import com.alan.lab.client.commands.subcommands.AddElem;
 import com.alan.lab.client.data.Person;
+import com.alan.lab.client.exceptions.InvalidEmptyLineException;
+import com.alan.lab.client.exceptions.InvalidPassportIDSizeException;
+import com.alan.lab.client.exceptions.InvalidValuesException;
+import com.alan.lab.client.exceptions.PasswordIDContainsException;
 import com.alan.lab.client.utility.CollectionManager;
 import com.alan.lab.client.utility.OutputManager;
 import com.alan.lab.client.utility.UserInputManager;
@@ -22,18 +26,14 @@ public class AddCommand extends Command {
 
     @Override
     public CommandResult execute(String arg) {
-        Integer errCode;
-        Person person = AddElem.add(arg);
-        if (person != null) {
-            errCode = collectionManager.add(person);
-            if (errCode == 0) {
-                return new CommandResult(false, "The element was added successfully");
-            }
-            if (errCode == 1) {
-                return new CommandResult(false, "passportId len");
-            }
-            return new CommandResult(false, "not unique passportId");
+        Person person;
+        try {
+            person = AddElem.add(true, userInputManager, outputManager, collectionManager);
+            collectionManager.add(person);
+            return new CommandResult(false, "success added");
+        } catch (InvalidValuesException | PasswordIDContainsException | InvalidPassportIDSizeException | InvalidEmptyLineException e) {
+            return new CommandResult(false, "not success:" + e.getMessage());
         }
-        return new CommandResult(false, "bad arg");
+
     }
 }

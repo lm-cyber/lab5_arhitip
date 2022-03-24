@@ -4,7 +4,6 @@ package com.alan.lab.client.commands;
 
 import com.alan.lab.client.utility.CollectionManager;
 
-import java.util.stream.Collectors;
 
 public class FilterGreaterThanHeightCommand extends Command {
 
@@ -17,9 +16,10 @@ public class FilterGreaterThanHeightCommand extends Command {
 
     @Override
     public CommandResult execute(String arg) {
-
-        return new CommandResult(false, collectionManager.getMainData().stream().filter(person -> {
-            return person.getHeight() > Float.parseFloat(arg);
-        }).collect(Collectors.toList()).toString());
+        try {
+            return new CommandResult(false, collectionManager.filterGreaterThanHeight(Float.parseFloat(arg)).toString());
+        } catch (NumberFormatException e) {
+            return new CommandResult(false, e.getMessage());
+        }
     }
 }
