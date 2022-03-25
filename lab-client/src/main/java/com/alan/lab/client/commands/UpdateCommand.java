@@ -24,13 +24,13 @@ public class UpdateCommand extends Command {
 
     @Override
     public CommandResult execute(String arg) {
-            Long id;
+        Long id;
         try {
             id = Long.parseLong(arg);
         } catch (NumberFormatException e) {
             return new CommandResult(false, "Your argument was incorrect. The command was not executed.");
         }
-        if(!collectionManager.isHaveId(id)) {
+        if (!collectionManager.isHaveId(id)) {
             return new CommandResult(false, "have not this id");
         }
         Person person;

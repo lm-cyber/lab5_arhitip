@@ -4,9 +4,10 @@ import com.alan.lab.client.utility.UserInputManager;
 
 public class ExitCommand extends Command {
     private UserInputManager userInputManager;
+
     public ExitCommand(UserInputManager userInputManager) {
         super("exit");
-        this.userInputManager= userInputManager;
+        this.userInputManager = userInputManager;
     }
 
     @Override

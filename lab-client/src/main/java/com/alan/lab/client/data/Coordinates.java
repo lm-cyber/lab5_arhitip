@@ -1,12 +1,13 @@
 package com.alan.lab.client.data;
 
-import com.alan.lab.client.exceptions.InvalidValuesException;
-import lombok.NonNull;
 import lombok.Data;
+import lombok.Builder;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import lombok.NonNull;
 
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class Coordinates {
@@ -16,7 +17,17 @@ public class Coordinates {
     @NonNull
     private Float y; //Значение поля должно быть больше -904, Поле не может быть null
 
+    @Override
+    public String toString() {
+        return "\n\tx=" + x
+                + "\n\ty=" + y + "\n";
+    }
+   /* public static CoordinatesBuilder builder() {
+        return new Coordinates().new CoordinatesBuilder();
+    }
     public class CoordinatesBuilder {
+
+
         public CoordinatesBuilder x(Float x) throws InvalidValuesException {
             if (x <= MINX) {
                 throw new InvalidValuesException("x<+" + MINX.toString());
@@ -24,7 +35,6 @@ public class Coordinates {
             Coordinates.this.x = x;
             return this;
         }
-
         public CoordinatesBuilder y(Float y) throws InvalidValuesException {
             if (y <= MINY) {
                 throw new InvalidValuesException("y<+" + MINY.toString());
@@ -36,15 +46,6 @@ public class Coordinates {
         public Coordinates build() {
             return Coordinates.this;
         }
-    }
 
-    public static CoordinatesBuilder builder() {
-        return new Coordinates().new CoordinatesBuilder();
-    }
-
-    @Override
-    public String toString() {
-        return "\n\tx=" + x +
-                "\n\ty=" + y + "\n";
-    }
+    }*/
 }

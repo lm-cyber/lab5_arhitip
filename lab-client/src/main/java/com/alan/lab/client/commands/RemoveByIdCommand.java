@@ -1,10 +1,8 @@
 package com.alan.lab.client.commands;
 
 
-import com.alan.lab.client.data.Person;
 import com.alan.lab.client.utility.CollectionManager;
 
-import java.util.Optional;
 
 
 public class RemoveByIdCommand extends Command {

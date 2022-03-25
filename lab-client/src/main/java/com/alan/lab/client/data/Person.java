@@ -1,20 +1,18 @@
 package com.alan.lab.client.data;
 
-import com.alan.lab.client.exceptions.InvalidEmptyLineException;
-import com.alan.lab.client.exceptions.InvalidPassportIDSizeException;
-import com.alan.lab.client.exceptions.InvalidValuesException;
-import lombok.NonNull;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
 
-import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
-public class Person implements Serializable, Comparable<Person> {
+@Builder
+@NoArgsConstructor
+public class Person implements Comparable<Person> {
     private static final int MAXLENPASSPORTID = 49;
     private static final int MINLENPASSPORTID = 6;
     @NonNull
@@ -36,14 +34,39 @@ public class Person implements Serializable, Comparable<Person> {
     @NonNull
     private Location location; //Поле может быть null
 
+    @Override
+    public String toString() {
+        return "Person"
+                + "\nid=" + id
+                + "\nname=" + name
+                + "coordinates" + coordinates
+                + "\ncreationDate=" + creationDate
+                + "\nheight=" + height
+                + "\nbirthday=" + birthday
+                + "\npassportID=" + passportID
+                + "\nhairColor=" + hairColor
+                + "\nlocation" + location;
+    }
+
+    @Override
+    public int compareTo(@NonNull Person person) {
+
+        return person.getHeight().compareTo(this.getHeight());
+    }
+    /*public static PersonBuilder builder() {
+        return new Person().new PersonBuilder();
+    }
     public class PersonBuilder {
+
+
+
         public PersonBuilder id(Long id) {
             Person.this.id = id;
             return this;
         }
 
         public PersonBuilder name(String name) throws InvalidEmptyLineException {
-            if (name.equals("")) {
+            if ("".equals(name)) {
                 throw new InvalidEmptyLineException("name is empty");
             }
             Person.this.name = name;
@@ -80,7 +103,6 @@ public class Person implements Serializable, Comparable<Person> {
             Person.this.passportID = passportID;
             return this;
         }
-
         public PersonBuilder hairColor(Color hairColor) {
             Person.this.hairColor = hairColor;
             return this;
@@ -94,30 +116,7 @@ public class Person implements Serializable, Comparable<Person> {
         public Person build() {
             return Person.this;
         }
-    }
 
-    public static PersonBuilder builder() {
-        return new Person().new PersonBuilder();
-    }
-
-    @Override
-    public String toString() {
-        return "Person" +
-                "\nid=" + id +
-                "\nname=" + name +
-                "coordinates" + coordinates +
-                "\ncreationDate=" + creationDate +
-                "\nheight=" + height +
-                "\nbirthday=" + birthday +
-                "\npassportID=" + passportID +
-                "\nhairColor=" + hairColor +
-                "\nlocation" + location;
-    }
-
-    @Override
-    public int compareTo(@NonNull Person person) {
-
-        return person.getHeight().compareTo(this.getHeight());
-    }
+    }*/
 
 }

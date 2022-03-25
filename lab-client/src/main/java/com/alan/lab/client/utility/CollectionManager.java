@@ -5,7 +5,11 @@ import com.alan.lab.client.exceptions.NotMinException;
 import com.alan.lab.client.exceptions.PasswordIDContainsException;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.List;
+import java.util.OptionalDouble;
+import java.util.PriorityQueue;
 import java.util.stream.Collectors;
 
 public class CollectionManager {
@@ -73,7 +77,7 @@ public class CollectionManager {
 
     public boolean removeByID(Long id) {
         if (mainData.stream().anyMatch(x -> x.getId().equals(id))) {
-            Person person = mainData.stream().filter(x ->x.getId().equals(id)).findAny().get();
+            Person person = mainData.stream().filter(x -> x.getId().equals(id)).findAny().get();
             passwordIds.remove(person.getPassportID());
             mainData.remove(person);
             removeId(id);
@@ -93,12 +97,17 @@ public class CollectionManager {
     public void removeId(Long id) {
         ids.remove(id);
     }
+
     public boolean isHaveId(Long id) {
         return mainData.stream().anyMatch((x -> x.getId().equals(id)));
     }
 
     public boolean isEmpty() {
         return mainData.isEmpty();
+    }
+
+    public boolean isContains(String passportID) {
+        return mainData.contains(passportID);
     }
 
     public Person poll() {

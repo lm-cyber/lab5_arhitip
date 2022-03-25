@@ -6,7 +6,6 @@ import com.alan.lab.client.utility.UserInputManager;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.zip.DataFormatException;
 
 public class ExecuteScriptCommand extends Command {
 

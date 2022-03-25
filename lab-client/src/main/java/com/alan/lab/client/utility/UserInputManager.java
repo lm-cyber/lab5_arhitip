@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.Scanner;
 import java.util.Stack;
+import java.util.function.Predicate;
 
 /**
  * This class is used for all the user input: keyboard and script execution
@@ -26,9 +27,10 @@ public class UserInputManager {
         while (shouldContinue) {
             outputManager.println("enter" + message + ":");
             try {
-                longResult = Long.parseLong(scanner.nextLine());
+                longResult = Long.parseLong(nextLine());
                 shouldContinue = false;
             } catch (NumberFormatException e) {
+                shouldContinue = true; // codestyle`
             }
         }
         return longResult;
@@ -40,9 +42,10 @@ public class UserInputManager {
         while (shouldContinue) {
             outputManager.println("enter" + message + ":");
             try {
-                doubleResult = Double.parseDouble(scanner.nextLine());
+                doubleResult = Double.parseDouble(nextLine());
                 shouldContinue = false;
             } catch (NumberFormatException e) {
+                shouldContinue = true; // codestyle`
             }
         }
         return doubleResult;
@@ -54,9 +57,10 @@ public class UserInputManager {
         while (shouldContinue) {
             outputManager.println("enter" + message + ":");
             try {
-                integerResult = Integer.parseInt(scanner.nextLine());
+                integerResult = Integer.parseInt(nextLine());
                 shouldContinue = false;
             } catch (NumberFormatException e) {
+                shouldContinue = true; // codestyle`
             }
         }
         return integerResult;
@@ -68,9 +72,26 @@ public class UserInputManager {
         while (shouldContinue) {
             outputManager.println("enter" + message + ":");
             try {
-                floatResult = Float.parseFloat(scanner.nextLine());
+                floatResult = Float.parseFloat(nextLine());
                 shouldContinue = false;
             } catch (NumberFormatException e) {
+                shouldContinue = true; // codestyle`
+            }
+
+        }
+        return floatResult;
+    }
+
+    public Float readFloatValue(String message, OutputManager outputManager, Predicate<Float> floatPredicate) {
+        boolean shouldContinue = true;
+        Float floatResult = null;
+        while (shouldContinue) {
+            outputManager.println("enter" + message + ":");
+            try {
+                floatResult = Float.parseFloat(nextLine());
+                shouldContinue = floatPredicate.test(floatResult);
+            } catch (NumberFormatException e) {
+                shouldContinue = true; // codestyle`
             }
 
         }
@@ -83,9 +104,10 @@ public class UserInputManager {
         while (shouldContinue) {
             outputManager.println("enter" + message + ":");
             try {
-                colorResult = Color.valueOf(scanner.nextLine());
+                colorResult = Color.valueOf(nextLine());
                 shouldContinue = false;
             } catch (IllegalArgumentException e) {
+                shouldContinue = true; // codestyle`
             }
         }
         return colorResult;
@@ -97,12 +119,28 @@ public class UserInputManager {
         while (shouldContinue) {
             outputManager.println("enter" + message + ":");
             try {
-                time = LocalDateTime.parse(scanner.nextLine());
+                time = LocalDateTime.parse(nextLine());
                 shouldContinue = false;
             } catch (DateTimeParseException e) {
+                shouldContinue = true; // codestyle`
             }
         }
         return time;
+    }
+
+    public String readStringWithPredicatValue(String message, OutputManager outputManager, Predicate<String> stringPredicate) {
+        boolean shouldContinue = true;
+        String passportId = null;
+        while (shouldContinue) {
+            outputManager.println("enter" + message + ":");
+            try {
+                passportId = nextLine();
+                shouldContinue = stringPredicate.test(passportId);
+            } catch (DateTimeParseException e) {
+                shouldContinue = true; // codestyle`
+            }
+        }
+        return passportId;
     }
 
 

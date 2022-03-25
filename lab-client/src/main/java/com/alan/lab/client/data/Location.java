@@ -2,8 +2,13 @@ package com.alan.lab.client.data;
 
 
 
-import lombok.*;
 
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
 
 import java.io.Serializable;
 @Data
@@ -18,9 +23,10 @@ public class Location implements Serializable {
 
     @Override
     public String toString() {
-        return "\n\tx=" + x +
-                "\n\ty=" + y +
-                "\n\tz=" + z + "\n";
+        return "\n\tx=" + x
+                + "\n\ty=" + y
+                + "\n\tz=" + z
+                + "\n";
     }
 }
 
