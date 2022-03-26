@@ -39,7 +39,7 @@ public class Person implements Comparable<Person> {
         return "Person"
                 + "\nid=" + id
                 + "\nname=" + name
-                + "coordinates" + coordinates
+                + "\ncoordinates" + coordinates
                 + "\ncreationDate=" + creationDate
                 + "\nheight=" + height
                 + "\nbirthday=" + birthday

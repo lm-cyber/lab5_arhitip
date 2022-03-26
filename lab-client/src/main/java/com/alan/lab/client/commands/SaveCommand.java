@@ -20,7 +20,6 @@ public class SaveCommand extends Command {
     @Override
     public CommandResult execute(String arg) {
         try {
-            collectionManager.getMainData().clear();
             fileManager.write(JsonParser.toJson(collectionManager.getMainData()));
         } catch (FileNotFoundException e) {
             return new CommandResult(false, "There was a problem saving a file. Please restart the program with another one");
