@@ -107,7 +107,7 @@ public class CollectionManager {
     }
 
     public boolean isContains(String passportID) {
-        return mainData.contains(passportID);
+        return passportID.contains(passportID);
     }
 
     public Person poll() {
