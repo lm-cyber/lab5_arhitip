@@ -2,10 +2,6 @@ package com.alan.lab.client.commands;
 
 import com.alan.lab.client.commands.subcommands.AddElem;
 import com.alan.lab.client.data.Person;
-import com.alan.lab.client.exceptions.InvalidEmptyLineException;
-import com.alan.lab.client.exceptions.InvalidPassportIDSizeException;
-import com.alan.lab.client.exceptions.InvalidValuesException;
-import com.alan.lab.client.exceptions.PasswordIDContainsException;
 import com.alan.lab.client.exceptions.NotMinException;
 import com.alan.lab.client.utility.CollectionManager;
 import com.alan.lab.client.utility.OutputManager;
@@ -32,7 +28,7 @@ public class AddIfMinCommand extends Command {
             person = AddElem.add(true, userInputManager, outputManager, collectionManager);
             collectionManager.addMin(person);
             return new CommandResult(false, "success added");
-        } catch (InvalidValuesException | PasswordIDContainsException | InvalidPassportIDSizeException | InvalidEmptyLineException | NotMinException e) {
+        } catch (NotMinException e) {
             return new CommandResult(false, "not success:" + e.getMessage());
         }
 

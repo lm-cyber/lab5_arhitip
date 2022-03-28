@@ -47,8 +47,6 @@ public final class Client {
             outputManager.println("Could not read the file. Check if it is available.");
         } catch (JsonSyntaxException | IllegalArgumentException e) {
             outputManager.println("The file does not keep data in correct format.");
-        } catch (Exception e) {
-            outputManager.println("Could not execute the program");
         }
     }
 }

@@ -2,7 +2,6 @@ package com.alan.lab.client.utility;
 
 import com.alan.lab.client.data.Person;
 import com.alan.lab.client.exceptions.NotMinException;
-import com.alan.lab.client.exceptions.PasswordIDContainsException;
 
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -57,7 +56,7 @@ public class CollectionManager {
         return iterId;
     }
 
-    public void addMin(Person person) throws PasswordIDContainsException, NotMinException {
+    public void addMin(Person person) throws NotMinException {
         if (getMinHeight() > person.getHeight()) {
             add(person);
         } else {
@@ -65,11 +64,7 @@ public class CollectionManager {
         }
     }
 
-    public void add(Person person) throws PasswordIDContainsException {
-
-        if (passwordIds.contains(person.getPassportID())) {
-            throw new PasswordIDContainsException();
-        }
+    public void add(Person person) {
         ids.add(person.getId());
         passwordIds.add(person.getPassportID());
         mainData.add(person);

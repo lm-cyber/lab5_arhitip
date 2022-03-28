@@ -3,9 +3,6 @@ package com.alan.lab.client.commands.subcommands;
 import com.alan.lab.client.data.Coordinates;
 import com.alan.lab.client.data.Location;
 import com.alan.lab.client.data.Person;
-import com.alan.lab.client.exceptions.InvalidEmptyLineException;
-import com.alan.lab.client.exceptions.InvalidPassportIDSizeException;
-import com.alan.lab.client.exceptions.InvalidValuesException;
 import com.alan.lab.client.utility.CollectionManager;
 import com.alan.lab.client.utility.OutputManager;
 import com.alan.lab.client.utility.UserInputManager;
@@ -21,7 +18,7 @@ public final class AddElem {
     private AddElem() {
     }
 
-    public static Person add(boolean newID, UserInputManager userInputManager, OutputManager outputManager, CollectionManager collectionManager) throws InvalidValuesException, InvalidEmptyLineException, InvalidPassportIDSizeException {
+    public static Person add(boolean newID, UserInputManager userInputManager, OutputManager outputManager, CollectionManager collectionManager) {
         Coordinates.CoordinatesBuilder coordinatesBuilder = Coordinates.builder();
         Location.LocationBuilder locationBuilder = Location.builder();
         locationBuilder.z(userInputManager.readLongValue("locationZ(Long)", outputManager));

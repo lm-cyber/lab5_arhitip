@@ -14,18 +14,18 @@ public class FileManager {
 
     public String read() throws FileNotFoundException {
         File file = new File(this.path);
-        Scanner scanner = new Scanner(file);
         String json = "";
-        while (scanner.hasNextLine()) {
-            json += scanner.nextLine() + '\n';
+        try (Scanner scanner = new Scanner(file)) {
+            while (scanner.hasNextLine()) {
+                json += scanner.nextLine() + '\n';
+            }
         }
-        scanner.close();
         return json;
     }
 
     public void write(String json) throws FileNotFoundException {
-        PrintWriter printWriter = new PrintWriter(path);
-        printWriter.write(json);
-        printWriter.close();
+        try (PrintWriter printWriter = new PrintWriter(path)) {
+            printWriter.write(json);
+        }
     }
 }
