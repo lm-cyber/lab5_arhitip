@@ -31,24 +31,12 @@ public class Console {
     }
 
     public void start() throws IllegalArgumentException, JsonSyntaxException, IOException {
-        String stringData = fileManager.read();
+        StringBuilder stringData = fileManager.read();
 
-        PriorityQueue<Person> people = JsonParser.toData(stringData);
+        PriorityQueue<Person> people = JsonParser.toData(String.valueOf(stringData));
         collectionManager.initialiseData(people);
 
         startCommandCycle();
-    }
-
-    private String[] parseToNameAndArg(String input) {
-        String[] arrayInput = input.split(" ");
-        String inputCommand = arrayInput[0];
-        String inputArg = "";
-
-        if (arrayInput.length >= 2) {
-            inputArg = arrayInput[1];
-        }
-
-        return new String[]{inputCommand, inputArg};
     }
 
     private String readNextCommand() {
@@ -62,7 +50,7 @@ public class Console {
             String name = "";
             String arg = "";
             String input = readNextCommand();
-            String[] commandNameAndArg = parseToNameAndArg(input);
+            String[] commandNameAndArg = new ParseToNameAndArg(input).getAll();
             if (commandNameAndArg.length >= 1) {
                 name = commandNameAndArg[0];
             }

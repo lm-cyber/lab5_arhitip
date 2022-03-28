@@ -12,12 +12,12 @@ public class FileManager {
         this.path = filename;
     }
 
-    public String read() throws FileNotFoundException {
+    public StringBuilder read() throws FileNotFoundException {
         File file = new File(this.path);
-        String json = "";
+        StringBuilder json = new StringBuilder("");
         try (Scanner scanner = new Scanner(file)) {
             while (scanner.hasNextLine()) {
-                json += scanner.nextLine() + '\n';
+                json.append(scanner.nextLine()).append('\n');
             }
         }
         return json;
