@@ -12,6 +12,7 @@ import com.alan.lab.client.utility.UserInputManager;
 import com.google.gson.JsonSyntaxException;
 
 import java.io.IOException;
+import java.util.NoSuchElementException;
 
 public final class Client {
    private Client() {
@@ -47,6 +48,8 @@ public final class Client {
             outputManager.println("Could not read the file. Check if it is available.");
         } catch (JsonSyntaxException | IllegalArgumentException e) {
             outputManager.println("The file does not keep data in correct format.");
+        } catch (NoSuchElementException e) {
+            outputManager.println("EOF");
         }
     }
 }
