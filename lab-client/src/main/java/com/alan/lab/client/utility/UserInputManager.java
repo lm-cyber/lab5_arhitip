@@ -20,6 +20,7 @@ public class UserInputManager implements AutoCloseable {
     private final Scanner scanner = new Scanner(System.in);
     private final Stack<BufferedReader> currentFilesReaders = new Stack<>();
     private final Stack<File> currentFiles = new Stack<>();
+    private boolean chekrek = false;
 
     public Long readLongValue(String message, OutputManager outputManager) {
         boolean shouldContinue = true;
@@ -162,6 +163,7 @@ public class UserInputManager implements AutoCloseable {
             }
 
         } else {
+            chekrek = false;
             return scanner.nextLine();
         }
     }
@@ -171,6 +173,7 @@ public class UserInputManager implements AutoCloseable {
             scanner.close();
             throw new DoubleExecuteException();
         } else {
+            chekrek = true;
             BufferedReader newReader = new BufferedReader(new FileReader(file));
             currentFiles.push(file);
             currentFilesReaders.push(newReader);
@@ -187,6 +190,9 @@ public class UserInputManager implements AutoCloseable {
         }
     }
 
+    public boolean getChekReg() {
+        return chekrek;
+    }
     public void close() {
         scanner.close();
         closeBufferedReader();
