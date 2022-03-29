@@ -158,16 +158,12 @@ public class UserInputManager {
 
 
             } catch (IOException e) {
-                // never throws exception
-                e.printStackTrace();
+                throw new RuntimeException("????");
             }
 
         } else {
             return scanner.nextLine();
         }
-
-        // never returns ""
-        return "";
     }
 
     public void connectToFile(File file) throws IOException, UnsupportedOperationException {
