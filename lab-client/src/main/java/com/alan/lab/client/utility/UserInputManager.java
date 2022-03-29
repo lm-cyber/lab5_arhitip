@@ -83,6 +83,28 @@ public class UserInputManager implements AutoCloseable {
         return floatResult;
     }
 
+    public Float readFloatValueH(String message, OutputManager outputManager, Predicate<Float> floatPredicate) {
+        boolean shouldContinue = true;
+        Float floatResult = null;
+        while (shouldContinue) {
+            outputManager.println("enter" + message + ":");
+            try {
+                String line = nextLine();
+
+                floatResult = "".equals(line) ? null : Float.parseFloat(line);
+                if (floatResult != null) {
+                    shouldContinue = floatPredicate.test(floatResult);
+                } else {
+                    shouldContinue = false;
+                }
+            } catch (NumberFormatException e) {
+                shouldContinue = true; // codestyle`
+            }
+
+        }
+        return floatResult;
+    }
+
     public Float readFloatValue(String message, OutputManager outputManager, Predicate<Float> floatPredicate) {
         boolean shouldContinue = true;
         Float floatResult = null;
@@ -105,7 +127,8 @@ public class UserInputManager implements AutoCloseable {
         while (shouldContinue) {
             outputManager.println("enter" + message + ":");
             try {
-                colorResult = Color.valueOf(nextLine());
+                String line = nextLine();
+                colorResult = "".equals(line) ? null : Color.valueOf(line);
                 shouldContinue = false;
             } catch (IllegalArgumentException e) {
                 shouldContinue = true; // codestyle`
@@ -193,6 +216,7 @@ public class UserInputManager implements AutoCloseable {
     public boolean getChekReg() {
         return chekrek;
     }
+
     public void close() {
         scanner.close();
         closeBufferedReader();

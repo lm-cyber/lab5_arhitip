@@ -23,15 +23,12 @@ public class Person implements Comparable<Person> {
     private Coordinates coordinates; //Поле не может быть null
     @NonNull
     private LocalDateTime creationDate; //Поле не может быть null, Значение этого поля должно генерироваться автоматически
-    @NonNull
     private Float height; //Поле может быть null, Значение поля должно быть больше 0
     @NonNull
     private LocalDateTime birthday; //Поле не может быть null
     @NonNull
     private String passportID; //Значение этого поля должно быть уникальным, Длина строки не должна быть больше 49, Длина строки должна быть не меньше 6, Поле не может быть null
-    @NonNull
     private Color hairColor; //Поле может быть null
-    @NonNull
     private Location location; //Поле может быть null
 
     @Override
@@ -48,9 +45,12 @@ public class Person implements Comparable<Person> {
                 + "\nlocation" + location;
     }
 
+    public Float getHeight() {
+        return height != null ? height : 0F;
+    }
+
     @Override
     public int compareTo(@NonNull Person person) {
-
         return person.getHeight().compareTo(this.getHeight());
     }
 

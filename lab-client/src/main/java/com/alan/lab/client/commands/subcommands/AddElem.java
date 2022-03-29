@@ -20,16 +20,23 @@ public final class AddElem {
 
     public static Person add(boolean newID, UserInputManager userInputManager, OutputManager outputManager, CollectionManager collectionManager) {
         Coordinates.CoordinatesBuilder coordinatesBuilder = Coordinates.builder();
-        Location.LocationBuilder locationBuilder = Location.builder();
-        locationBuilder.z(userInputManager.readLongValue("locationZ(Long)", outputManager));
-        locationBuilder.x(userInputManager.readDoubleValue("locationX(Double)", outputManager));
-        locationBuilder.y(userInputManager.readIntegerValue("locationY(Integer)", outputManager));
+        outputManager.println("add location(yes)");
+        Location location;
+        if (userInputManager.nextLine().equals("yes")) {
+            Location.LocationBuilder locationBuilder = Location.builder();
+            locationBuilder.z(userInputManager.readLongValue("locationZ(Long)", outputManager));
+            locationBuilder.x(userInputManager.readDoubleValue("locationX(Double)", outputManager));
+            locationBuilder.y(userInputManager.readIntegerValue("locationY(Integer)", outputManager));
+            location = locationBuilder.build();
+        } else {
+            location = null;
+        }
         coordinatesBuilder.x(userInputManager.readFloatValue("coordinatesX(Float)", outputManager, x -> x < MINX));
         coordinatesBuilder.y(userInputManager.readFloatValue("coordinatesY(Float)", outputManager, x -> x < MINY));
         Person.PersonBuilder personBuilder = Person.builder();
-        personBuilder.location(locationBuilder.build());
+        personBuilder.location(location);
         personBuilder.coordinates(coordinatesBuilder.build());
-        personBuilder.height(userInputManager.readFloatValue("height(Float)", outputManager, x -> x <= 0));
+        personBuilder.height(userInputManager.readFloatValueH("height(Float)", outputManager, x -> x <= 0));
         personBuilder.name(userInputManager.readStringWithPredicatValue("name", outputManager, x -> x.equals("")));
         personBuilder.hairColor(userInputManager.readHairColorValue(" RED or GREEN or ORANGE", outputManager));
         if (newID) {
