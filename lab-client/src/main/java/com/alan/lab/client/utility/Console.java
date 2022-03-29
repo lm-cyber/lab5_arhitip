@@ -57,12 +57,7 @@ public class Console {
             if (commandNameAndArg.length >= 2) {
                 arg = commandNameAndArg[1];
             }
-            try {
-                commandResult = commandRunManager.runCommand(name, arg);
-            } catch (Exception e) {
-                commandResult = new CommandResult(false, e.getMessage() + " something bad,try ");
-
-            }
+            commandResult = commandRunManager.runCommand(name, arg);
             outputManager.println(commandResult.getOutput());
         } while (!Objects.requireNonNull(commandResult).isExit());
     }
