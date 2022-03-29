@@ -20,9 +20,9 @@ public final class AddElem {
 
     public static Person add(boolean newID, UserInputManager userInputManager, OutputManager outputManager, CollectionManager collectionManager) {
         Coordinates.CoordinatesBuilder coordinatesBuilder = Coordinates.builder();
-        outputManager.println("add location(yes)");
+        outputManager.println("add location(\"\")");
         Location location;
-        if (userInputManager.nextLine().equals("yes")) {
+        if (!userInputManager.nextLine().equals("")) {
             Location.LocationBuilder locationBuilder = Location.builder();
             locationBuilder.z(userInputManager.readLongValue("locationZ(Long)", outputManager));
             locationBuilder.x(userInputManager.readDoubleValue("locationX(Double)", outputManager));
