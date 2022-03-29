@@ -180,12 +180,12 @@ public class UserInputManager {
             currentFilesReaders.push(newReader);
         }
     }
+
     public void closeBufferedReader() {
-        if(!currentFilesReaders.isEmpty() && currentFilesReaders.peek()!=null) {
+        if (!currentFilesReaders.isEmpty() && currentFilesReaders.peek() != null) {
             try {
                 currentFilesReaders.pop().close();
-            }catch (IOException e)
-            {
+            } catch (IOException e) {
                 throw new RuntimeException("????");
             }
         }

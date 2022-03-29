@@ -16,4 +16,12 @@ public class ParseToNameAndArg {
         all[1] = arg;
         return all;
     }
+
+    public String getArg() {
+        return arg;
+    }
+
+    public String getName() {
+        return name;
+    }
 }

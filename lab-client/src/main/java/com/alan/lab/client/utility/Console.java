@@ -50,13 +50,9 @@ public class Console {
             String name = "";
             String arg = "";
             String input = readNextCommand();
-            String[] commandNameAndArg = new ParseToNameAndArg(input).getAll();
-            if (commandNameAndArg.length >= 1) {
-                name = commandNameAndArg[0];
-            }
-            if (commandNameAndArg.length >= 2) {
-                arg = commandNameAndArg[1];
-            }
+            ParseToNameAndArg parseToNameAndArg = new ParseToNameAndArg(input);
+            name = parseToNameAndArg.getName();
+            arg = parseToNameAndArg.getArg();
             commandResult = commandRunManager.runCommand(name, arg);
             outputManager.println(commandResult.getOutput());
         } while (!Objects.requireNonNull(commandResult).isExit());
