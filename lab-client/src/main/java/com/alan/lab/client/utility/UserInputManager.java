@@ -16,7 +16,7 @@ import java.util.function.Predicate;
 /**
  * This class is used for all the user input: keyboard and script execution
  */
-public class UserInputManager {
+public class UserInputManager implements AutoCloseable {
     private final Scanner scanner = new Scanner(System.in);
     private final Stack<BufferedReader> currentFilesReaders = new Stack<>();
     private final Stack<File> currentFiles = new Stack<>();
@@ -177,7 +177,7 @@ public class UserInputManager {
         }
     }
 
-    public void closeBufferedReader() {
+    private void closeBufferedReader() {
         if (!currentFilesReaders.isEmpty() && currentFilesReaders.peek() != null) {
             try {
                 currentFilesReaders.pop().close();
@@ -189,6 +189,7 @@ public class UserInputManager {
 
     public void close() {
         scanner.close();
+        closeBufferedReader();
     }
 
 }

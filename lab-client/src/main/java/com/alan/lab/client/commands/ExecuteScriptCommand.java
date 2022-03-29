@@ -24,7 +24,6 @@ public class ExecuteScriptCommand extends Command {
         } catch (IOException e) {
             return new CommandResult(false, "There was a problem opening the file. Check if it is available and you have written it in the command arg correctly.");
         } catch (DoubleExecuteException e) {
-            userInputManager.closeBufferedReader();
             return new CommandResult(false, e.getMessage());
         }
     }

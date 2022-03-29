@@ -15,7 +15,7 @@ import java.io.IOException;
 import java.util.NoSuchElementException;
 
 public final class Client {
-   private Client() {
+    private Client() {
         throw new UnsupportedOperationException("This is an utility class and can not be instantiated");
     }
 
@@ -32,24 +32,25 @@ public final class Client {
             outputManager.println("This program can only work with .json file.");
             return;
         }
+        try (UserInputManager userInputManager = new UserInputManager()) {
 
-        final HistoryManager historyManager = new HistoryManager();
-        final CollectionManager collectionManager = new CollectionManager();
-        final FileManager fileManager = new FileManager(args[0]);
-        final UserInputManager userInputManager = new UserInputManager();
-        final CommandManager commandManager = new CommandManager(fileManager, userInputManager, collectionManager, outputManager, historyManager);
-        final CommandRunManager commandRunManager = new CommandRunManager(commandManager, historyManager);
-        final Console console = new Console(fileManager,
-                userInputManager, collectionManager, outputManager,
-                commandRunManager);
-        try {
-            console.start();
-        } catch (IOException e) {
-            outputManager.println("Could not read the file. Check if it is available.");
-        } catch (JsonSyntaxException | IllegalArgumentException e) {
-            outputManager.println("The file does not keep data in correct format.");
-        } catch (NoSuchElementException e) {
-            outputManager.println("EOF");
+            final HistoryManager historyManager = new HistoryManager();
+            final CollectionManager collectionManager = new CollectionManager();
+            final FileManager fileManager = new FileManager(args[0]);
+            final CommandManager commandManager = new CommandManager(fileManager, userInputManager, collectionManager, outputManager, historyManager);
+            final CommandRunManager commandRunManager = new CommandRunManager(commandManager, historyManager);
+            final Console console = new Console(fileManager,
+                    userInputManager, collectionManager, outputManager,
+                    commandRunManager);
+            try {
+                console.start();
+            } catch (IOException e) {
+                outputManager.println("Could not read the file. Check if it is available.");
+            } catch (JsonSyntaxException | IllegalArgumentException e) {
+                outputManager.println("The file does not keep data in correct format.");
+            } catch (NoSuchElementException e) {
+                outputManager.println("EOF");
+            }
         }
     }
 }
