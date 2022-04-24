@@ -1,18 +1,12 @@
 package com.alan.lab.client;
 
-import com.alan.lab.client.utility.CollectionManager;
-import com.alan.lab.client.utility.CommandManager;
-import com.alan.lab.client.utility.Console;
-import com.alan.lab.client.utility.FileManager;
-import com.alan.lab.client.utility.CommandRunManager;
-import com.alan.lab.client.utility.HistoryManager;
-import com.alan.lab.client.utility.OutputManager;
-import com.alan.lab.client.utility.UserInputManager;
 
-import com.google.gson.JsonSyntaxException;
+import com.alan.lab.common.utility.OutputManager;
+import com.alan.lab.common.utility.TerminalColors;
+import com.alan.lab.common.utility.UserInputManager;
 
 import java.io.IOException;
-import java.util.NoSuchElementException;
+import java.net.InetSocketAddress;
 
 public final class Client {
     private Client() {
@@ -20,37 +14,21 @@ public final class Client {
     }
 
     public static void main(String[] args) {
-
-        final OutputManager outputManager = new OutputManager();
-
-        if (args.length == 0) {
-            outputManager.println("This program needs a file in argument to work with.");
+        try {
+            InetSocketAddress addr = new InetSocketAddress("127.0.0.1", 8999);
+            ConsoleClient console = new ConsoleClient(new UserInputManager(),new OutputManager(), addr);
+            console.run();
+        } catch (IndexOutOfBoundsException | NumberFormatException e) {
+            System.out.println(
+                TerminalColors.colorString("Unable to parse host address and port from arguments. You should pass them in as arguments", TerminalColors.RED)
+            );
+            e.printStackTrace();
+        } catch (IOException e) {
+            System.out.println(
+                TerminalColors.colorString("Failed to launch app", TerminalColors.RED)
+            );
+            e.printStackTrace();
             return;
-        }
-
-        if (!args[0].endsWith(".json")) {
-            outputManager.println("This program can only work with .json file.");
-            return;
-        }
-        try (UserInputManager userInputManager = new UserInputManager()) {
-
-            final HistoryManager historyManager = new HistoryManager();
-            final CollectionManager collectionManager = new CollectionManager();
-            final FileManager fileManager = new FileManager(args[0]);
-            final CommandManager commandManager = new CommandManager(fileManager, userInputManager, collectionManager, outputManager, historyManager);
-            final CommandRunManager commandRunManager = new CommandRunManager(commandManager, historyManager);
-            final Console console = new Console(fileManager,
-                    userInputManager, collectionManager, outputManager,
-                    commandRunManager);
-            try {
-                console.start();
-            } catch (IOException e) {
-                outputManager.println("Could not read the file. Check if it is available.");
-            } catch (JsonSyntaxException | IllegalArgumentException e) {
-                outputManager.println("The file does not keep data in correct format.");
-            } catch (NoSuchElementException e) {
-                outputManager.println("EOF");
-            }
         }
     }
 }
