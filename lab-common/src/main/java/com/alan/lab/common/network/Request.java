@@ -16,4 +16,7 @@ public class Request implements Serializable {
         return commandName;
     }
 
+    public String getArgs() {
+        return args;
+    }
 }

@@ -3,7 +3,6 @@ package com.alan.lab.server;
 
 import com.alan.lab.common.network.Request;
 import com.alan.lab.common.network.Response;
-import com.alan.lab.common.network.ResponseWithException;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -13,7 +12,6 @@ import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
@@ -24,6 +22,11 @@ public class ServerInstance {
     private final ExecutorService responseSenderPool = Executors.newCachedThreadPool();
     private final BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 
+    private final WorkWithCommand workWithCommand;
+
+    public ServerInstance(String fileName) {
+        this.workWithCommand = new WorkWithCommand(fileName);
+    }
 
     private boolean acceptConsoleInput() throws IOException {
         if (System.in.available() > 0) {
@@ -104,7 +107,7 @@ public class ServerInstance {
 
                         if (received != null && received instanceof Request) {
                             Request request = (Request) received;
-                            Response response = new Response("asdasd");
+                            Response response = new Response(workWithCommand.returnStringResponce(request.getCommandName(),request.getArgs()));
                             responseSenderPool.submit(() -> {
                                 if (!socket.sendMessage(response)) {
                                 }

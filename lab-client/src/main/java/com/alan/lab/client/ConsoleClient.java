@@ -7,6 +7,7 @@ import com.alan.lab.common.utility.OutputManager;
 import com.alan.lab.common.utility.TerminalColors;
 import com.alan.lab.common.utility.UserInputManager;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.channels.SocketChannel;
@@ -80,6 +81,12 @@ public class ConsoleClient {
         String input;
         while ((input = userInputManager.nextLine()) != null) {
             try {
+                if(input.equals("exit")) {
+                    return;
+                }
+                if(input.startsWith("execute_script")){
+                    userInputManager.connectToFile(new File(input.split(" ",2)[1]));
+                }
                 Request request = new Request(input,input);
 
                 // If the command is not only client-side
