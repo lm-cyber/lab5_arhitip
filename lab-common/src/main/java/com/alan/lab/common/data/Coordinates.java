@@ -6,11 +6,13 @@ import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 
+import java.io.Serializable;
+
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Coordinates {
+public class Coordinates implements Serializable {
     private static final Float MINX = -601F;
     private static final Float MINY = -904F;
     private float x; //Значение поля должно быть больше -601

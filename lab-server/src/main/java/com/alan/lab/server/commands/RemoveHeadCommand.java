@@ -1,16 +1,13 @@
 package com.alan.lab.server.commands;
 
 import com.alan.lab.server.utility.CollectionManager;
-import com.alan.lab.server.utility.OutputManager;
 
 public class RemoveHeadCommand extends Command {
     private CollectionManager collectionManager;
-    private OutputManager outputManager;
 
-    public RemoveHeadCommand(CollectionManager collectionManager, OutputManager outputManager) {
+    public RemoveHeadCommand(CollectionManager collectionManager) {
         super("remove_head");
         this.collectionManager = collectionManager;
-        this.outputManager = outputManager;
     }
 
     @Override

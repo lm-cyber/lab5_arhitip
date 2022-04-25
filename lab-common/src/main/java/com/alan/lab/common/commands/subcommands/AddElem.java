@@ -3,7 +3,6 @@ package com.alan.lab.common.commands.subcommands;
 import com.alan.lab.common.data.Coordinates;
 import com.alan.lab.common.data.Location;
 import com.alan.lab.common.data.Person;
-import com.alan.lab.common.utility.CollectionManager;
 import com.alan.lab.common.utility.OutputManager;
 import com.alan.lab.common.utility.UserInputManager;
 
@@ -18,7 +17,7 @@ public final class AddElem {
     private AddElem() {
     }
 
-    public static Person add(boolean newID, UserInputManager userInputManager, OutputManager outputManager, CollectionManager collectionManager) {
+    public static Person add( UserInputManager userInputManager, OutputManager outputManager) {
         Coordinates.CoordinatesBuilder coordinatesBuilder = Coordinates.builder();
         outputManager.println("add location(\"\")");
         Location location;
@@ -39,15 +38,11 @@ public final class AddElem {
         personBuilder.height(userInputManager.readFloatValueH("height(Float)", outputManager, x -> x <= 0));
         personBuilder.name(userInputManager.readStringWithPredicatValue("name", outputManager, x -> x.equals("")));
         personBuilder.hairColor(userInputManager.readHairColorValue(" RED or GREEN or ORANGE", outputManager));
-        if (newID) {
-            personBuilder.id(collectionManager.getNewID());
-        } else {
-            personBuilder.id(0L);
-        }
+        personBuilder.id(0L);
         personBuilder.creationDate(LocalDateTime.now());
         personBuilder.birthday(userInputManager.readBirthdayValue("birthday patern\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}", outputManager));
         personBuilder.passportID(userInputManager.readStringWithPredicatValue("passportId", outputManager, x -> {
-            return x.length() < MINLENPASSPORTID || x.length() > MAXLENPASSPORTID || collectionManager.isContains(x);
+            return x.length() < MINLENPASSPORTID || x.length() > MAXLENPASSPORTID ;
         }));
         return personBuilder.build();
 
