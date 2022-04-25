@@ -6,13 +6,14 @@ import lombok.Builder;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
 @Builder
 @NoArgsConstructor
-public class Person implements Comparable<Person> {
+public class Person implements Comparable<Person> , Serializable {
     private static final int MAXLENPASSPORTID = 49;
     private static final int MINLENPASSPORTID = 6;
     @NonNull

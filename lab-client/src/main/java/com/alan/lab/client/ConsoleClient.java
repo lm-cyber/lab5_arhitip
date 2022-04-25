@@ -1,9 +1,13 @@
 package com.alan.lab.client;
 
+import com.alan.lab.common.commands.subcommands.AddElem;
+import com.alan.lab.common.data.Person;
 import com.alan.lab.common.network.Request;
+import com.alan.lab.common.network.RequestWithPerson;
 import com.alan.lab.common.network.Response;
 import com.alan.lab.common.network.ResponseWithException;
 import com.alan.lab.common.utility.OutputManager;
+import com.alan.lab.common.utility.ParseToNameAndArg;
 import com.alan.lab.common.utility.TerminalColors;
 import com.alan.lab.common.utility.UserInputManager;
 
@@ -76,7 +80,10 @@ public class ConsoleClient {
             writeTrace(rwe.getException());
         }
     }
-
+ /*commands.add(new AddCommand(collectionManager, userInputManager, outputManager));
+        commands.add(new UpdateCommand(collectionManager, userInputManager, outputManager));
+        commands.add(new AddIfMinCommand(collectionManager, userInputManager, outputManager));
+        */
     private void inputCycle() {
         String input;
         while ((input = userInputManager.nextLine()) != null) {
@@ -87,7 +94,15 @@ public class ConsoleClient {
                 if(input.startsWith("execute_script")){
                     userInputManager.connectToFile(new File(input.split(" ",2)[1]));
                 }
-                Request request = new Request(input,input);
+                ParseToNameAndArg parseToNameAndArg = new ParseToNameAndArg(input);
+                Request request ;
+                if(parseToNameAndArg.getName().equals("add") ||parseToNameAndArg.getName().equals("add_if_min") ||parseToNameAndArg.getName().equals("update") )
+                {
+                    Person person = AddElem.add(userInputManager,outputManager);
+                    request = new RequestWithPerson(parseToNameAndArg.getName(),parseToNameAndArg.getArg(),person);
+                } else {
+                    request = new Request(parseToNameAndArg.getName(),parseToNameAndArg.getArg());
+                }
 
                 // If the command is not only client-side
                 if (request != null) {

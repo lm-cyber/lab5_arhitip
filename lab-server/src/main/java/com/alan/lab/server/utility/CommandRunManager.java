@@ -1,6 +1,7 @@
 package com.alan.lab.server.utility;
 
 
+import com.alan.lab.common.data.Person;
 import com.alan.lab.server.commands.*;
 
 public class CommandRunManager {
@@ -13,6 +14,20 @@ public class CommandRunManager {
     }
 
     public CommandResult runCommand(String name, String arg) {
+        CommandResult commandResult = null;
+        for (Command command : commandManager.getCommands()) {
+            if (command.getName().equals(name)) {
+                commandResult = command.execute(arg);
+                historyManager.addNote(command.getName());
+                break;
+            }
+        }
+        if (commandResult == null) {
+            return new CommandResult(false, "This command was not found. Please use \"help\" to know about available commands");
+        }
+        return commandResult;
+    }
+    public CommandResult runAddCommand(String name, String arg, Person person) {
         CommandResult commandResult = null;
         for (Command command : commandManager.getCommands()) {
             if (command.getName().equals(name)) {

@@ -15,7 +15,6 @@ public class CommandManager {
                           CollectionManager collectionManager,
                           HistoryManager historyManager) {
         commands.add(new HelpCommand());
-        commands.add(new SaveCommand(fileManager, collectionManager));
         commands.add(new ShowCommand(collectionManager));
         commands.add(new RemoveByIdCommand(collectionManager));
         commands.add(new ClearCommand(collectionManager));
@@ -24,6 +23,13 @@ public class CommandManager {
         commands.add(new InfoCommand(collectionManager));
         commands.add(new HistoryCommand(historyManager));
         commands.add(new AverageOfHeightCommand(collectionManager));
+        commands.add(new RemoveHeadCommand(collectionManager));
+
+
+        commands.add(new AddCommand(collectionManager));
+        commands.add(new UpdateCommand(collectionManager));
+        commands.add(new AddIfMinCommand(collectionManager));
+
     }
 
     public HashSet<Command> getCommands() {
