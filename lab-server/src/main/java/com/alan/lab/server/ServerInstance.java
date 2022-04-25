@@ -7,24 +7,22 @@ import com.alan.lab.common.network.Response;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.net.SocketTimeoutException;
+import java.net.InetSocketAddress;
+import java.nio.channels.ServerSocketChannel;
+import java.nio.channels.SocketChannel;
 import java.util.HashSet;
-import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ForkJoinPool;
+import java.util.Iterator;
 
 public class ServerInstance {
-    private static final int SOCKET_TIMEOUT = 10;
-    private final ForkJoinPool requestHandlerPool = new ForkJoinPool();
-    private final ExecutorService responseSenderPool = Executors.newCachedThreadPool();
+
+
+ private final WorkWithCommand workWithCommand;
+ private final HashSet<ObjectSocketWrapper> clients;
+
     private final BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
-
-    private final WorkWithCommand workWithCommand;
-
     public ServerInstance(String fileName) {
+
+        clients = new HashSet<>();
         this.workWithCommand = new WorkWithCommand(fileName);
     }
 
@@ -45,81 +43,52 @@ public class ServerInstance {
         return false;
     }
 
-    public void run(int port) throws IOException {
-        Set<ClientThread> clients = new HashSet<>();
+    public void handleRequests() throws IOException {
+        Iterator<ObjectSocketWrapper> it = clients.iterator();
+        while (it.hasNext()) {
+            ObjectSocketWrapper client = it.next();
 
-        try (ServerSocket socket = new ServerSocket(port)) {
-            socket.setSoTimeout(SOCKET_TIMEOUT);
+            try {
+                if (client.checkForMessage()) {
+                    Object received = client.getPayload();
+
+                    if (received != null && received instanceof Request) {
+                        Request request = (Request) received;
+                        Response response =  new Response(workWithCommand.returnStringResponce(request.getCommandName(),request.getArgs()));
+                        client.sendMessage(response);
+                    } else {
+                    }
+
+                    client.clearInBuffer();
+                }
+            } catch (IOException e) {
+                client.getSocket().close();
+                it.remove();
+            }
+        }
+    }
+
+    public void run(int port) throws IOException {
+        try (ServerSocketChannel channel = ServerSocketChannel.open();) {
+            channel.bind(new InetSocketAddress(port));
+            channel.configureBlocking(false);
 
 
             while (true) {
                 // Accept input from console and stop server if needed
                 if (acceptConsoleInput()) {
-                    clients.forEach(x -> x.stop());
-                    requestHandlerPool.shutdown();
-                    responseSenderPool.shutdown();
                     return;
                 }
 
                 // Accept pending connections
-                try {
-                    while (true) {
-                        Socket newClient = socket.accept();
-                        newClient.setSoTimeout(SOCKET_TIMEOUT);
-                        ClientThread client = new ClientThread(new ObjectSocketWrapper(newClient));
-                        clients.add(client);
-                        client.start();
-                    }
-                } catch (SocketTimeoutException e) {
+                SocketChannel newClient = null;
+                while ((newClient = channel.accept()) != null) {
+                    newClient.configureBlocking(false);
+                    clients.add(new ObjectSocketWrapper(newClient));
                 }
-            }
-        }
-    }
 
-    private class ClientThread {
-        private final ObjectSocketWrapper socket;
-        private final Thread thread;
-        private boolean running = true;
-
-        ClientThread(ObjectSocketWrapper socket) {
-            this.socket = socket;
-            this.thread = new Thread(this::handleRequests);
-            this.thread.setName("Client" + this.socket.getSocket().getRemoteSocketAddress());
-        }
-
-        void start() {
-            thread.start();
-        }
-
-        void stop() {
-            running = false;
-            try {
-                socket.getSocket().close();
-            } catch (IOException e) {
-            }
-        }
-
-        void handleRequests() {
-            while (running) {
-                try {
-                    if (socket.checkForMessage()) {
-                        Object received = socket.getPayload();
-
-                        if (received != null && received instanceof Request) {
-                            Request request = (Request) received;
-                            Response response = new Response(workWithCommand.returnStringResponce(request.getCommandName(),request.getArgs()));
-                            responseSenderPool.submit(() -> {
-                                if (!socket.sendMessage(response)) {
-                                }
-                            });
-                        } else {
-                        }
-
-                        socket.clearInBuffer();
-                    }
-                } catch (IOException e) {
-                    stop();
-                }
+                // Handle new requests
+                handleRequests();
             }
         }
     }

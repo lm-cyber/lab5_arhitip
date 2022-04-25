@@ -1,65 +1,71 @@
 package com.alan.lab.server;
 
-import com.alan.lab.common.network.ObjectEncoder;
-
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.net.Socket;
-import java.net.SocketTimeoutException;
+import java.io.*;
 import java.nio.ByteBuffer;
+import java.nio.channels.SocketChannel;
 
 public class ObjectSocketWrapper {
-    private final Socket socket;
-    private byte[] sizeInBuffer;
-    private byte[] payloadBuffer;
-    private int sizeInBufferPos = 0;
-    private int payloadBufferPos = 0;
 
-    public ObjectSocketWrapper(Socket socket) {
+    private final SocketChannel socket;
+    private ByteBuffer sizeIntBuffer = ByteBuffer.allocate(Integer.BYTES);
+    private ByteBuffer payloadBuffer = null;
+
+    public ObjectSocketWrapper(SocketChannel socket) {
         this.socket = socket;
-        this.sizeInBuffer = new byte[Integer.BYTES];
-        this.payloadBuffer = null;
     }
 
-    public boolean sendMessage(Object object) {
-        try {
-            byte[] msg = ObjectEncoder.encodeObject(object).array();
+    /**
+     * Serializes and encodes an object with the following format:
+     * [4 bytes integer N = size of the serialized object][ N bytes of the serialized object ]
+     * @param object
+     * @return a byte buffer with the above specfied format.
+     */
+    public static ByteBuffer encodeObject(Object object) throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ObjectOutputStream oos = new ObjectOutputStream(baos);
+        oos.writeObject(object);
 
-            socket.getOutputStream().write(msg);
-            return true;
-        } catch (IOException e) {
-            return false;
+        ByteBuffer buffer = ByteBuffer.allocate(Integer.BYTES + baos.size());
+
+        buffer.putInt(baos.size());
+        buffer.put(baos.toByteArray());
+
+        return buffer;
+    }
+
+    public void sendMessage(Object object) throws IOException {
+        ByteBuffer outBuffer = encodeObject(object);
+        outBuffer.flip();
+
+        while (outBuffer.hasRemaining()) {
+            socket.write(outBuffer);
         }
     }
 
     public boolean checkForMessage() throws IOException {
-        try {
-            if (payloadBuffer != null && payloadBufferPos >= payloadBuffer.length) {
-                return true;
-            }
+        // No need to check anything if payload is already read.
+        if (payloadBuffer != null && !payloadBuffer.hasRemaining()) {
+            return true;
+        }
 
-            int readBytes = socket.getInputStream().read(sizeInBuffer, sizeInBufferPos, Integer.BYTES - sizeInBufferPos);
-            sizeInBufferPos += readBytes;
-            if (sizeInBufferPos < Integer.BYTES) {
-                return false;
-            }
-
-            if (payloadBuffer == null) {
-                payloadBuffer = new byte[ByteBuffer.wrap(sizeInBuffer).getInt()];
-            }
-
-            readBytes = socket.getInputStream().read(payloadBuffer, payloadBufferPos, payloadBuffer.length - payloadBufferPos);
-            payloadBufferPos += readBytes;
-
-            return payloadBufferPos >= payloadBuffer.length;
-        } catch (SocketTimeoutException e) {
+        // Try to read the entire header containing number of bytes in payload
+        socket.read(sizeIntBuffer);
+        if (sizeIntBuffer.hasRemaining()) {
             return false;
         }
+
+        // Header is received, generate the payload buffer
+        if (payloadBuffer == null) {
+            payloadBuffer = ByteBuffer.allocate(sizeIntBuffer.getInt(0));
+        }
+
+        // Try to read to payload buffer
+        socket.read(payloadBuffer);
+        return !payloadBuffer.hasRemaining();
     }
 
     public Object getPayload() throws IOException {
-        ByteArrayInputStream bais = new ByteArrayInputStream(payloadBuffer);
+        ByteArrayInputStream bais = new ByteArrayInputStream(payloadBuffer.array());
         ObjectInputStream ois = new ObjectInputStream(bais);
 
         try {
@@ -70,13 +76,12 @@ public class ObjectSocketWrapper {
     }
 
     public void clearInBuffer() {
-        sizeInBuffer = new byte[Integer.BYTES];
+        sizeIntBuffer.clear();
         payloadBuffer = null;
-        sizeInBufferPos = 0;
-        payloadBufferPos = 0;
     }
 
-    public Socket getSocket() {
+    public SocketChannel getSocket() {
         return socket;
     }
+
 }
