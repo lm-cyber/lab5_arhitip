@@ -24,7 +24,7 @@ public class AddIfMinCommand extends Command {
     public CommandResult execute(String arg) {
         Person person;
         try {
-            person = AddElem.add(true, userInputManager, outputManager, collectionManager);
+            person = AddElem.add(userInputManager, outputManager);
             collectionManager.addMin(person);
             return new CommandResult(false, "success added");
         } catch (NotMinException e) {

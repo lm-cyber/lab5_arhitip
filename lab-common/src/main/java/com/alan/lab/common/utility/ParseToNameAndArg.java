@@ -2,15 +2,28 @@ package com.alan.lab.common.utility;
 
 public class ParseToNameAndArg {
     private String name;
-    private String arg;
-
+    private Object arg;
     public ParseToNameAndArg(String line) {
         String[] lineSplit = line.split(" ", 2);
         this.name = lineSplit[0];
-        this.arg = lineSplit.length == 2 ? lineSplit[1] : "";
+        switch (name) {
+            case "update" :
+                this.arg = Long.parseLong(lineSplit[1]);
+                break;
+            case"remove_by_id":
+                this.arg = Long.parseLong(lineSplit[1]);
+                break;
+            case "filter_greater_than_height" :
+                this.arg = Float.parseFloat(lineSplit[1]);
+                break;
+            default:
+                this.arg = lineSplit.length == 2 ? lineSplit[1] : "";
+                break;
+        }
     }
 
-    public String getArg() {
+
+    public Object getArg() {
         return arg;
     }
 

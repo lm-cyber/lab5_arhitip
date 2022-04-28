@@ -2,12 +2,23 @@ package com.alan.lab.common.network;
 
 import java.io.Serializable;
 
-public class Request extends AbstractRequest implements Serializable {
-    private static final long serialVersionUID = 4643797287519810631L;
+public class Request implements Serializable {
 
 
-    public Request(String commandName, String args) {
-        super(commandName,args);
+    private static final long serialVersionUID = 8241171356382541350L;
+    private String commandName;
+    private  Object args;
+
+    public Request(String commandName, Object args) {
+        this.commandName = commandName;
+        this.args = args;
+    }
+    public String getCommandName() {
+        return commandName;
+    }
+
+    public Object getArgs() {
+        return args;
     }
 
 

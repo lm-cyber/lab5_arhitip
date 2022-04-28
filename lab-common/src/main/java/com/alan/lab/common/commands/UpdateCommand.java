@@ -30,7 +30,7 @@ public class UpdateCommand extends Command {
             return new CommandResult(false, "have not this id");
         }
         Person person;
-        person = AddElem.add(false, userInputManager, outputManager, collectionManager);
+        person = AddElem.add(userInputManager, outputManager);
         person.setId(id);
         collectionManager.removeByID(id);
         collectionManager.add(person);

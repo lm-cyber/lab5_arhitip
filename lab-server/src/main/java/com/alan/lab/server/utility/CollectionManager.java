@@ -28,6 +28,10 @@ public class CollectionManager {
         passwordIds.clear();
         mainData.clear();
     }
+    public void update(Person person) {
+        removeByID(person.getId());
+        add(person);
+    }
 
     public LocalDate getCreationDate() {
         return creationDate;
@@ -118,7 +122,6 @@ public class CollectionManager {
     public List<Person> filterGreaterThanHeight(Float height) {
         return this.mainData.stream().filter(person -> person.getHeight() > height).collect(Collectors.toList());
     }
-
     @Override
     public String toString() {
         return mainData.toString();

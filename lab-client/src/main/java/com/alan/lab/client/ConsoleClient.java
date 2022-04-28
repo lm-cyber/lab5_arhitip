@@ -1,6 +1,5 @@
 package com.alan.lab.client;
 
-import com.alan.lab.common.commands.subcommands.AddElem;
 import com.alan.lab.common.data.Person;
 import com.alan.lab.common.network.Request;
 import com.alan.lab.common.network.RequestWithPerson;
@@ -80,44 +79,58 @@ public class ConsoleClient {
             writeTrace(rwe.getException());
         }
     }
- /*commands.add(new AddCommand(collectionManager, userInputManager, outputManager));
-        commands.add(new UpdateCommand(collectionManager, userInputManager, outputManager));
-        commands.add(new AddIfMinCommand(collectionManager, userInputManager, outputManager));
-        */
+
     private void inputCycle() {
+        boolean addCammand = false;
         String input;
         while ((input = userInputManager.nextLine()) != null) {
             try {
-                if(input.equals("exit")) {
+                if (input.equals("exit")) {
                     return;
                 }
-                if(input.startsWith("execute_script")){
-                    userInputManager.connectToFile(new File(input.split(" ",2)[1]));
+                if (input.startsWith("execute_script")) {
+                    userInputManager.connectToFile(new File(input.split(" ", 2)[1]));
                 }
-                ParseToNameAndArg parseToNameAndArg = new ParseToNameAndArg(input);
-                Request request ;
-                if(parseToNameAndArg.getName().equals("add") ||parseToNameAndArg.getName().equals("add_if_min") ||parseToNameAndArg.getName().equals("update") )
-                {
-                    Person person = AddElem.add(userInputManager,outputManager);
-                    request = new RequestWithPerson(parseToNameAndArg.getName(),parseToNameAndArg.getArg(),person);
-                } else {
-                    request = new Request(parseToNameAndArg.getName(),parseToNameAndArg.getArg());
-                }
+                Request request = null;
+                RequestWithPerson requestWithPerson = null;
+                try {
+                    ParseToNameAndArg parseToNameAndArg = new ParseToNameAndArg(input);
+                    if (addCammand) {
+                        Person person = AddElem.add(userInputManager, outputManager);
+                        requestWithPerson = new RequestWithPerson(person);
+                    } else {
+
+                        request = new Request(parseToNameAndArg.getName(), parseToNameAndArg.getArg());
+
+
+                    }
+
 
                 // If the command is not only client-side
                 if (request != null) {
                     remote.sendMessage(request);
-                    // Block until received response or timed out
-                    Response response = waitForResponse();
-
-                    if (response != null) {
-                        handleResponse(response);
-                    } else {
-                        outputManager.println("Request failed");
-                    }
-
-                    remote.clearInBuffer();
+                } else {
+                    remote.sendMessage(requestWithPerson);
                 }
+
+                // Block until received response or timed out
+                Response response = waitForResponse();
+
+                if (response != null) {
+                    handleResponse(response);
+                    addCammand = response.getAddsCommand();
+
+                } else {
+                    outputManager.println("Request failed");
+                }
+                } catch (NumberFormatException e) {
+                    outputManager.println("problem with args");
+                }
+
+
+                remote.clearInBuffer();
+
+
             } catch (IOException e) {
                 outputManager.println("Caught exception when trying to send request");
                 writeTrace(e);

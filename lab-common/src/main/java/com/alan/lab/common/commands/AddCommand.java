@@ -23,7 +23,7 @@ public class AddCommand extends Command {
     @Override
     public CommandResult execute(String arg) {
         Person person;
-        person = AddElem.add(true, userInputManager, outputManager, collectionManager);
+        person = AddElem.add( userInputManager, outputManager);
         collectionManager.add(person);
         return new CommandResult(false, "success added");
 

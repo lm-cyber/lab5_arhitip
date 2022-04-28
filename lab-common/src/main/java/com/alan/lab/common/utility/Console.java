@@ -52,7 +52,7 @@ public class Console {
             String input = readNextCommand();
             ParseToNameAndArg parseToNameAndArg = new ParseToNameAndArg(input);
             name = parseToNameAndArg.getName();
-            arg = parseToNameAndArg.getArg();
+            arg = "asdad";
             commandResult = commandRunManager.runCommand(name, arg);
             outputManager.println(commandResult.getOutput());
         } while (!Objects.requireNonNull(commandResult).isExit());

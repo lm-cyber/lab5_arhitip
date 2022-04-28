@@ -4,12 +4,12 @@ import com.alan.lab.common.data.Person;
 
 import java.io.Serializable;
 
-public class RequestWithPerson extends Request implements Serializable {
+public class RequestWithPerson implements Serializable {
+    private static final long serialVersionUID = 8336802963880051781L;
     private Person person;
 
 
-    public RequestWithPerson(String commandName, String args,Person person) {
-        super(commandName, args);
+    public RequestWithPerson(Person person) {
         this.person= person;
     }
 

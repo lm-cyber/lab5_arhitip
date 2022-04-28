@@ -7,6 +7,7 @@ import com.alan.lab.common.network.RequestWithPerson;
 import com.alan.lab.common.network.Response;
 import com.alan.lab.server.utility.CollectionManager;
 import com.alan.lab.server.utility.FileManager;
+import com.alan.lab.server.utility.HistoryManager;
 import com.alan.lab.server.utility.JsonParser;
 
 import java.io.BufferedReader;
@@ -22,15 +23,16 @@ import java.util.PriorityQueue;
 
 public class ServerInstance {
 
-
+    private final ResponseCreator responseCreator;
     private final FileManager fileManager;
     private final CollectionManager collectionManager;
  private final HashSet<ObjectSocketWrapper> clients;
 
     private final BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
-    public ServerInstance(String fileName) {
+    public ServerInstance( String fileName) {
         this.collectionManager = new CollectionManager();
         this.fileManager = new FileManager(fileName);
+        this.responseCreator = new ResponseCreator(new HistoryManager(),collectionManager);
         clients = new HashSet<>();
     }
     private void start() {
@@ -71,11 +73,15 @@ public class ServerInstance {
                 if (client.checkForMessage()) {
                     Object received = client.getPayload();
 
-                    if (received instanceof Request) {
-                        Request request = (Request) received;
-                        Response response =  new Response();
+                    if (received instanceof RequestWithPerson) {
+                        RequestWithPerson requestWithPerson = (RequestWithPerson) received;
+                        Response response =  new Response("biba",false);
                         client.sendMessage(response);
-                    } else if(received instanceof RequestWithPerson) {
+                    } else if(received instanceof Request) {
+                        Request request = (Request) received;
+                        responseCreator.addHistory(request.getCommandName()+ " "+ request.getArgs().toString());
+                        Response response = responseCreator.executeCommand(request.getCommandName(),request.getArgs());
+                        client.sendMessage(response);
 
                     }
 
