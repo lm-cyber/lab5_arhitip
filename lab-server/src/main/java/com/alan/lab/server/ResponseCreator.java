@@ -77,7 +77,7 @@ public class ResponseCreator {
             case "print_descending":
                 return new Response(collectionManager.descending().toString(),false);
             case "history":
-                return new Response("work in progress",false);
+                return new Response(historyManager.niceToString(),false);
             default:
                 return new Response("This command was not found. Please use \"help\" to know about available commands",false);
 
