@@ -28,9 +28,9 @@ public class CollectionManager {
         passwordIds.clear();
         mainData.clear();
     }
-    public void update(Person person) {
+    public boolean update(Person person) {
         removeByID(person.getId());
-        add(person);
+        return add(person);
     }
 
     public LocalDate getCreationDate() {
@@ -56,18 +56,25 @@ public class CollectionManager {
         return iterId;
     }
 
-    public void addMin(Person person) throws NotMinException {
+    public boolean addMin(Person person) throws NotMinException {
         if (getMinHeight() > person.getHeight()) {
-            add(person);
+         return    add(person);
         } else {
             throw new NotMinException();
         }
+
     }
 
-    public void add(Person person) {
-        ids.add(person.getId());
-        passwordIds.add(person.getPassportID());
-        mainData.add(person);
+    public boolean add(Person person) {
+        if (!isContains(person.getPassportID())) {
+            person.setId(getNewID());
+            ids.add(person.getId());
+            passwordIds.add(person.getPassportID());
+            mainData.add(person);
+            return true;
+        }
+        return false;
+
     }
 
     public boolean removeByID(Long id) {
@@ -94,7 +101,7 @@ public class CollectionManager {
     }
 
     public boolean isHaveId(Long id) {
-        return mainData.stream().anyMatch((x -> x.getId().equals(id)));
+        return ids.contains(id);
     }
 
     public boolean isEmpty() {

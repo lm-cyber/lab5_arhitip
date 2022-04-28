@@ -75,7 +75,20 @@ public class ServerInstance {
 
                     if (received instanceof RequestWithPerson) {
                         RequestWithPerson requestWithPerson = (RequestWithPerson) received;
-                        Response response =  new Response("biba",false);
+                        Response response ;
+                        switch (requestWithPerson.getType()) {
+                            case ADD :
+                                response = responseCreator.add(requestWithPerson.getPerson());
+                                break;
+                            case UPDATE:
+                                response = responseCreator.update(requestWithPerson.getPerson());
+                                break;
+                            case ADD_IF_MIN:
+                                response = responseCreator.addIfMin(requestWithPerson.getPerson());
+                                break;
+                            default:
+                                response = new Response("something bad",false);
+                        }
                         client.sendMessage(response);
                     } else if(received instanceof Request) {
                         Request request = (Request) received;

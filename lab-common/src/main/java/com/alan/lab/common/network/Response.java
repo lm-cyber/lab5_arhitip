@@ -8,6 +8,7 @@ public class Response implements Serializable {
     private boolean addsCommand;
     public Response(String message,boolean addsCommand) {
         this.message = message;
+        this.addsCommand =addsCommand;
     }
     public boolean getAddsCommand() {
         return addsCommand;

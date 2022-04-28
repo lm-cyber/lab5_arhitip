@@ -1,11 +1,14 @@
 package com.alan.lab.server;
 
+import com.alan.lab.common.data.Person;
+import com.alan.lab.common.exceptions.NotMinException;
 import com.alan.lab.server.utility.CollectionManager;
 import com.alan.lab.server.utility.HistoryManager;
 import com.alan.lab.common.network.Response;
 public class ResponseCreator {
     private final HistoryManager historyManager;
     private final CollectionManager collectionManager;
+    private Long lastId;
     private final String helpString = "    help : вывести справку по доступным командам\n"
             + "    info : вывести в стандартный поток вывода информацию о коллекции (тип, дата инициализации, количество элементов и т.д.)\n"
             + "    show : вывести в стандартный поток вывода все элементы коллекции в строковом представлении\n"
@@ -29,6 +32,11 @@ public class ResponseCreator {
     public void addHistory(String input) {
         historyManager.addNote(input);
     }
+
+    public Long getLastId() {
+        return lastId;
+    }
+
     public Response executeCommand(String name, Object arg) {
         switch (name) {
             case "help" :
@@ -41,6 +49,7 @@ public class ResponseCreator {
                         + "count_elem:" + collectionManager.getSize() + "\n",false);
             case "update":
                 if(collectionManager.isHaveId((Long) arg)) {
+                    lastId = (Long) arg;
                     return new Response("have",true);
                 }
                 return new Response("havent",false);
@@ -71,6 +80,32 @@ public class ResponseCreator {
                 return new Response("work in progress",false);
             default:
                 return new Response("This command was not found. Please use \"help\" to know about available commands",false);
+
+        }
+    }
+    public Response add(Person person) {
+        if(collectionManager.add(person)) {
+            return new Response("add success",false);
+        }
+        return new Response("contains passport",false);
+
+    }
+    public Response update(Person person) {
+        person.setId(lastId);
+        if(collectionManager.update(person)) {
+            return new Response("add success",false);
+        }
+        return new Response("contains passport",false);
+    }
+    public Response addIfMin(Person person) {
+        try {
+            if (collectionManager.addMin(person)) {
+                return new Response("add success",false);
+            }
+            return new Response("passport contains",false);
+        }catch (NotMinException e) {
+            return new Response(e.getMessage(), false);
+
 
         }
     }

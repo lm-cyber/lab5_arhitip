@@ -1,10 +1,7 @@
 package com.alan.lab.client;
 
 import com.alan.lab.common.data.Person;
-import com.alan.lab.common.network.Request;
-import com.alan.lab.common.network.RequestWithPerson;
-import com.alan.lab.common.network.Response;
-import com.alan.lab.common.network.ResponseWithException;
+import com.alan.lab.common.network.*;
 import com.alan.lab.common.utility.OutputManager;
 import com.alan.lab.common.utility.ParseToNameAndArg;
 import com.alan.lab.common.utility.TerminalColors;
@@ -70,21 +67,21 @@ public class ConsoleClient {
         return null;
     }
 
-    private void handleResponse(Response response) {
-        outputManager.println(response.getMessage());
 
-        if (response instanceof ResponseWithException) {
-            ResponseWithException rwe = (ResponseWithException) response;
-
-            writeTrace(rwe.getException());
-        }
-    }
 
     private void inputCycle() {
         boolean addCammand = false;
-        String input;
-        while ((input = userInputManager.nextLine()) != null) {
+        RequestWithPersonType type =null;
+        String input=null;
+        boolean shouldContinue =true;
+        while (shouldContinue) {
+            if(!addCammand) {
+                if ((input = userInputManager.nextLine()) == null) {
+                    shouldContinue = false;
+                }
+            }
             try {
+
                 if (input.equals("exit")) {
                     return;
                 }
@@ -97,7 +94,7 @@ public class ConsoleClient {
                     ParseToNameAndArg parseToNameAndArg = new ParseToNameAndArg(input);
                     if (addCammand) {
                         Person person = AddElem.add(userInputManager, outputManager);
-                        requestWithPerson = new RequestWithPerson(person);
+                        requestWithPerson = new RequestWithPerson(person,type);
                     } else {
 
                         request = new Request(parseToNameAndArg.getName(), parseToNameAndArg.getArg());
@@ -106,19 +103,22 @@ public class ConsoleClient {
                     }
 
 
-                // If the command is not only client-side
-                if (request != null) {
-                    remote.sendMessage(request);
-                } else {
-                    remote.sendMessage(requestWithPerson);
-                }
+                    // If the command is not only client-side
+                    if (request != null) {
+                        remote.sendMessage(request);
+                    } else {
+                        remote.sendMessage(requestWithPerson);
+                    }
 
-                // Block until received response or timed out
-                Response response = waitForResponse();
+                    // Block until received response or timed out
+                    Response response = waitForResponse();
 
-                if (response != null) {
-                    handleResponse(response);
-                    addCammand = response.getAddsCommand();
+                    if (response != null) {
+                        outputManager.println(response.getMessage());
+                        addCammand = response.getAddsCommand();
+                        if(addCammand) {
+                            type = RequestWithPersonType.valueOf(parseToNameAndArg.getName().toUpperCase());
+                        }
 
                 } else {
                     outputManager.println("Request failed");
