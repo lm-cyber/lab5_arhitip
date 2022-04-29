@@ -1,6 +1,11 @@
 package com.alan.lab.server;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 
@@ -17,6 +22,7 @@ public class ObjectSocketWrapper {
     /**
      * Serializes and encodes an object with the following format:
      * [4 bytes integer N = size of the serialized object][ N bytes of the serialized object ]
+     *
      * @param object
      * @return a byte buffer with the above specfied format.
      */
@@ -35,7 +41,7 @@ public class ObjectSocketWrapper {
 
     public void sendMessage(Object object) throws IOException {
         ByteBuffer outBuffer = encodeObject(object);
-        outBuffer.flip();
+        ((Buffer) outBuffer).flip();
 
         while (outBuffer.hasRemaining()) {
             socket.write(outBuffer);

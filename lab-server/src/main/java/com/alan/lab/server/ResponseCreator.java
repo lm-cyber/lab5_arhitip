@@ -29,6 +29,7 @@ public class ResponseCreator {
         this.historyManager = historyManager;
         this.collectionManager = collectionManager;
     }
+
     public void addHistory(String input) {
         historyManager.addNote(input);
     }
@@ -37,73 +38,108 @@ public class ResponseCreator {
         return lastId;
     }
 
-    public Response executeCommand(String name, Object arg) {
+    public Response executeCommand(String name) {
+        Response response;
         switch (name) {
-            case "help" :
-                return new Response(helpString,false);
-            case "show" :
-                return new Response(collectionManager.toString(),false);
-            case "info" :
-                return new Response("type:" + collectionManager.getType().toString()
+            case "help":
+                response = new Response(helpString, false);
+                break;
+            case "show":
+                response = new Response(collectionManager.toString(), false);
+                break;
+            case "info":
+                response = new Response("type:" + collectionManager.getType().toString()
                         + "\ndate:" + collectionManager.getCreationDate().toString() + "\n"
-                        + "count_elem:" + collectionManager.getSize() + "\n",false);
-            case "update":
-                if(collectionManager.isHaveId((Long) arg)) {
-                    lastId = (Long) arg;
-                    return new Response("have",true);
-                }
-                return new Response("havent",false);
-            case "add" :
-                return new Response("add start", true);
-            case "remove_by_id":
-                if(collectionManager.removeByID((Long) arg)) {
-                    return new Response("remove success",false);
-                }
-                return new Response("remove not success",false);
-            case "clear" :
-                collectionManager.clear();
-                return new Response("clear success",false);
+                        + "count_elem:" + collectionManager.getSize() + "\n", false);
+                break;
             case "remove_head":
-                if(collectionManager.isEmpty()) {
-                    return  new Response("is empty ,cant remove_head",false);
+                if (collectionManager.isEmpty()) {
+                    response = new Response("is empty ,cant remove_head", false);
+                    break;
                 }
-                return new Response(collectionManager.poll().toString(),false);
-            case "add_if_min":
-                return  new Response("add if min start",true);
-            case "average_of_height":
-                return new Response(collectionManager.averageHeight().toString(),false);
-            case "filter_greater_than_height":
-                return new Response(collectionManager.filterGreaterThanHeight((Float) arg).toString(), false );
-            case "print_descending":
-                return new Response(collectionManager.descending().toString(),false);
-            case "history":
-                return new Response(historyManager.niceToString(),false);
+                response = new Response(collectionManager.poll().toString(), false);
+                break;
             default:
-                return new Response("This command was not found. Please use \"help\" to know about available commands",false);
+                response = new Response("This command was not found. Please use \"help\" to know about available commands", false);
+                break;
 
         }
+        return response;
+
+
     }
+
+    @SuppressWarnings("methodlength")
+    public Response executeCommand(String name, Object arg) {
+        Response response;
+        switch (name) {
+            case "update":
+                if (collectionManager.isHaveId((Long) arg)) {
+                    lastId = (Long) arg;
+                    response = new Response("have", true);
+                    break;
+                }
+                response = new Response("havent", false);
+                break;
+            case "add":
+                response = new Response("add start", true);
+                break;
+            case "clear":
+                collectionManager.clear();
+                response = new Response("clear success", false);
+                break;
+            case "remove_head":
+                if (collectionManager.isEmpty()) {
+                    response = new Response("is empty ,cant remove_head", false);
+                    break;
+                }
+                response = new Response(collectionManager.poll().toString(), false);
+                break;
+            case "add_if_min":
+                response = new Response("add if min start", true);
+                break;
+            case "average_of_height":
+                response = new Response(collectionManager.averageHeight().toString(), false);
+                break;
+            case "filter_greater_than_height":
+                response = new Response(collectionManager.filterGreaterThanHeight((Float) arg).toString(), false);
+                break;
+            case "print_descending":
+                response = new Response(collectionManager.descending().toString(), false);
+                break;
+            case "history":
+                response = new Response(historyManager.niceToString(), false);
+                break;
+            default:
+                response = executeCommand(name);
+                break;
+        }
+        return response;
+    }
+
     public Response add(Person person) {
-        if(collectionManager.add(person)) {
-            return new Response("add success",false);
+        if (collectionManager.add(person)) {
+            return new Response("add success", false);
         }
-        return new Response("contains passport",false);
+        return new Response("contains passport", false);
 
     }
+
     public Response update(Person person) {
         person.setId(lastId);
-        if(collectionManager.update(person)) {
-            return new Response("add success",false);
+        if (collectionManager.update(person)) {
+            return new Response("add success", false);
         }
-        return new Response("contains passport",false);
+        return new Response("contains passport", false);
     }
+
     public Response addIfMin(Person person) {
         try {
             if (collectionManager.addMin(person)) {
-                return new Response("add success",false);
+                return new Response("add success", false);
             }
-            return new Response("passport contains",false);
-        }catch (NotMinException e) {
+            return new Response("passport contains", false);
+        } catch (NotMinException e) {
             return new Response(e.getMessage(), false);
 
 

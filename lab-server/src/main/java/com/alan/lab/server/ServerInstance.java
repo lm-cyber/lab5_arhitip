@@ -26,15 +26,17 @@ public class ServerInstance {
     private final ResponseCreator responseCreator;
     private final FileManager fileManager;
     private final CollectionManager collectionManager;
- private final HashSet<ObjectSocketWrapper> clients;
+    private final HashSet<ObjectSocketWrapper> clients;
 
     private final BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
-    public ServerInstance( String fileName) {
+
+    public ServerInstance(String fileName) {
         this.collectionManager = new CollectionManager();
         this.fileManager = new FileManager(fileName);
-        this.responseCreator = new ResponseCreator(new HistoryManager(),collectionManager);
+        this.responseCreator = new ResponseCreator(new HistoryManager(), collectionManager);
         clients = new HashSet<>();
     }
+
     private void start() {
         StringBuilder stringData = null;
         try {
@@ -46,12 +48,13 @@ public class ServerInstance {
         PriorityQueue<Person> people = JsonParser.toData(String.valueOf(stringData));
         collectionManager.initialiseData(people);
     }
+
     private boolean acceptConsoleInput() throws IOException {
         if (System.in.available() > 0) {
             String command = in.readLine();
             switch (command) {
                 case "save":
-
+                    fileManager.write(JsonParser.toJson(collectionManager.getMainData()));
                     break;
                 case "exit":
                     System.out.println("Shutting down");
@@ -64,6 +67,7 @@ public class ServerInstance {
         return false;
     }
 
+    @SuppressWarnings("methodlength")
     public void handleRequests() throws IOException {
         Iterator<ObjectSocketWrapper> it = clients.iterator();
         while (it.hasNext()) {
@@ -75,9 +79,9 @@ public class ServerInstance {
 
                     if (received instanceof RequestWithPerson) {
                         RequestWithPerson requestWithPerson = (RequestWithPerson) received;
-                        Response response ;
+                        Response response;
                         switch (requestWithPerson.getType()) {
-                            case ADD :
+                            case ADD:
                                 response = responseCreator.add(requestWithPerson.getPerson());
                                 break;
                             case UPDATE:
@@ -87,13 +91,13 @@ public class ServerInstance {
                                 response = responseCreator.addIfMin(requestWithPerson.getPerson());
                                 break;
                             default:
-                                response = new Response("something bad",false);
+                                response = new Response("something bad", false);
                         }
                         client.sendMessage(response);
-                    } else if(received instanceof Request) {
+                    } else if (received instanceof Request) {
                         Request request = (Request) received;
-                        responseCreator.addHistory(request.getCommandName()+ " "+ request.getArgs().toString());
-                        Response response = responseCreator.executeCommand(request.getCommandName(),request.getArgs());
+                        responseCreator.addHistory(request.getCommandName() + " " + request.getArgs().toString());
+                        Response response = responseCreator.executeCommand(request.getCommandName(), request.getArgs());
                         client.sendMessage(response);
 
                     }

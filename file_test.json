@@ -1,19 +1,18 @@
 [
   {
-    "id": 1,
-    "name": "testfghjkllllltest",
+    "id": 0,
+    "name": "lllllllllllllllllllllllllllllllllllllllllllllllllllllllllll",
     "coordinates": {
-      "x": 123.0,
-      "y": 123.0
+      "x": 213.0,
+      "y": 213.0
     },
-    "creationDate": "2022-03-26T15:46:54.085",
-    "height": 123.0,
-    "birthday": "1000-10-10T01:01",
-    "passportID": "nyygnnyggyngygy",
-    "hairColor": "RED",
+    "creationDate": "2022-04-29T01:18:49.866",
+    "height": 213.0,
+    "birthday": "2000-11-11T20:20",
+    "passportID": "asadsasdads",
     "location": {
       "x": 123.0,
-      "y": 123,
+      "y": 312,
       "z": 123
     }
   },
@@ -33,6 +32,24 @@
       "x": 1.0,
       "y": 1,
       "z": 1
+    }
+  },
+  {
+    "id": 1,
+    "name": "testfghjkllllltest",
+    "coordinates": {
+      "x": 123.0,
+      "y": 123.0
+    },
+    "creationDate": "2022-03-26T15:46:54.085",
+    "height": 123.0,
+    "birthday": "1000-10-10T01:01",
+    "passportID": "nyygnnyggyngygy",
+    "hairColor": "RED",
+    "location": {
+      "x": 123.0,
+      "y": 123,
+      "z": 123
     }
   }
 ]

@@ -10,8 +10,8 @@ public class RequestWithPerson implements Serializable {
     private RequestWithPersonType type;
 
 
-    public RequestWithPerson(Person person ,RequestWithPersonType type) {
-        this.person= person;
+    public RequestWithPerson(Person person, RequestWithPersonType type) {
+        this.person = person;
         this.type = type;
     }
 

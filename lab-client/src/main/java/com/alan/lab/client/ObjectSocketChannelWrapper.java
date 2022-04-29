@@ -5,6 +5,7 @@ import com.alan.lab.common.network.ObjectEncoder;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 
@@ -19,7 +20,7 @@ public class ObjectSocketChannelWrapper {
 
     public void sendMessage(Object object) throws IOException {
         ByteBuffer outBuffer = ObjectEncoder.encodeObject(object);
-        outBuffer.flip();
+        ((Buffer) outBuffer).flip();
 
         while (outBuffer.hasRemaining()) {
             socket.write(outBuffer);
@@ -60,7 +61,7 @@ public class ObjectSocketChannelWrapper {
     }
 
     public void clearInBuffer() {
-        sizeIntBuffer.clear();
+        ((Buffer) sizeIntBuffer).clear();
         payloadBuffer = null;
     }
 

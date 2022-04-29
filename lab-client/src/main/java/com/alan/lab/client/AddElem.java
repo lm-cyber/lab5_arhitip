@@ -17,7 +17,7 @@ public final class AddElem {
     private AddElem() {
     }
 
-    public static Person add( UserInputManager userInputManager, OutputManager outputManager) {
+    public static Person add(UserInputManager userInputManager, OutputManager outputManager) {
         Coordinates.CoordinatesBuilder coordinatesBuilder = Coordinates.builder();
         outputManager.println("add location(\"\")");
         Location location;
@@ -42,7 +42,7 @@ public final class AddElem {
         personBuilder.creationDate(LocalDateTime.now());
         personBuilder.birthday(userInputManager.readBirthdayValue("birthday patern\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}", outputManager));
         personBuilder.passportID(userInputManager.readStringWithPredicatValue("passportId", outputManager, x -> {
-            return x.length() < MINLENPASSPORTID || x.length() > MAXLENPASSPORTID ;
+            return x.length() < MINLENPASSPORTID || x.length() > MAXLENPASSPORTID;
         }));
         return personBuilder.build();
 

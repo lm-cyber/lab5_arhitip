@@ -28,9 +28,9 @@ public final class Server {
 
             ServerInstance serverInstance = new ServerInstance(args[0]);
             try {
-                port= Integer.parseInt(args[1]);
+                port = Integer.parseInt(args[1]);
                 serverInstance.run(port);
-            }catch (IllegalArgumentException e) {
+            } catch (IllegalArgumentException e) {
                 System.out.println("bat port");
             }
         } catch (IOException e) {

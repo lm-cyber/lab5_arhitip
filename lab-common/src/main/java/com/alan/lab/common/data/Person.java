@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 @NoArgsConstructor
-public class Person implements Comparable<Person> , Serializable {
+public class Person implements Comparable<Person>, Serializable {
     private static final int MAXLENPASSPORTID = 49;
     private static final int MINLENPASSPORTID = 6;
     @NonNull
