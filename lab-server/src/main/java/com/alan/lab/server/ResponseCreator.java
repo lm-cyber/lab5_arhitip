@@ -73,6 +73,13 @@ public class ResponseCreator {
     public Response executeCommand(String name, Object arg) {
         Response response;
         switch (name) {
+            case "remove_by_id":
+                if (!collectionManager.removeByID((Long) arg)) {
+                    response = new Response("delete success", false);
+
+                }
+                response = new Response("havent id", false);
+                break;
             case "update":
                 if (collectionManager.isHaveId((Long) arg)) {
                     lastId = (Long) arg;

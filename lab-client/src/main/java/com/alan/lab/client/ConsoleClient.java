@@ -44,27 +44,6 @@ public class ConsoleClient {
         );
     }
 
-    private Response waitForResponse() throws IOException {
-        int seconds = 0;
-        long start = System.currentTimeMillis();
-        while (seconds < TIMEOUT) {
-            if (remote.checkForMessage()) {
-                Object received = remote.getPayload();
-                if (received instanceof Response) {
-                    return (Response) received;
-                } else {
-                    outputManager.println("Received invalid response from server");
-                    break;
-                }
-            }
-            if (System.currentTimeMillis() >= start + (seconds + 1) * MILLIS_IN_SECONDS) {
-                outputManager.print(".");
-                seconds++;
-            }
-        }
-        outputManager.println("Timed out after " + TIMEOUT + " seconds.");
-        return null;
-    }
     private boolean chekInput(String input) throws IOException {
         if ("exit".equals(input)) {
             return true;
@@ -74,6 +53,7 @@ public class ConsoleClient {
         }
         return false;
     }
+
     @SuppressWarnings("methodlength")
     private void inputCycle() {
         boolean addCammand = false;
@@ -127,13 +107,57 @@ public class ConsoleClient {
             }
         }
     }
+
     public void run() throws IOException {
         try (SocketChannel socket = SocketChannel.open()) {
-            socket.connect(addr);
+            if (!connection(socket)) {
+                return;
+            }
             socket.configureBlocking(false);
             remote = new ObjectSocketChannelWrapper(socket);
 
             inputCycle();
         }
+    }
+
+    private boolean connection(SocketChannel socket) {
+        int second = 0;
+        long start = System.currentTimeMillis();
+        while (second < TIMEOUT) {
+            try {
+                socket.connect(addr);
+                return true;
+            } catch (IOException e) {
+
+                if (System.currentTimeMillis() >= start + (long) (second + 1) * MILLIS_IN_SECONDS) {
+                    outputManager.print(".");
+                    second++;
+                }
+            }
+        }
+        outputManager.println("time out");
+        return false;
+    }
+
+    private Response waitForResponse() throws IOException {
+        int seconds = 0;
+        long start = System.currentTimeMillis();
+        while (seconds < TIMEOUT) {
+            if (remote.checkForMessage()) {
+                Object received = remote.getPayload();
+                if (received instanceof Response) {
+                    return (Response) received;
+                } else {
+                    outputManager.println("Received invalid response from server");
+                    break;
+                }
+            }
+            if (System.currentTimeMillis() >= start + (long) (seconds + 1) * MILLIS_IN_SECONDS) {
+                outputManager.print(".");
+                seconds++;
+            }
+        }
+        outputManager.println("Timed out after " + TIMEOUT + " seconds.");
+        return null;
     }
 }
