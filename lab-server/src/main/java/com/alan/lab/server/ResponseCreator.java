@@ -1,7 +1,6 @@
 package com.alan.lab.server;
 
 import com.alan.lab.common.data.Person;
-import com.alan.lab.common.exceptions.NotMinException;
 import com.alan.lab.common.network.Response;
 import com.alan.lab.server.utility.CollectionManager;
 import com.alan.lab.server.utility.HistoryManager;
@@ -59,33 +58,8 @@ public class ResponseCreator {
         return commands.getOrDefault(name,new NameHaventCommand()).execute(arg);
     }
 
-    public Response add(Person person) {
-        if (collectionManager.add(person)) {
-            return new Response("add success", false);
-        }
-        return new Response("contains passport", false);
 
+    public Response executeCommandWithPerson(String name , Person person) {
+        return null;
     }
-
-    public Response update(Person person) {
-        person.setId(lastId);
-        if (collectionManager.update(person)) {
-            return new Response("add success", false);
-        }
-        return new Response("contains passport", false);
-    }
-
-    public Response addIfMin(Person person) {
-        try {
-            if (collectionManager.addMin(person)) {
-                return new Response("add success", false);
-            }
-            return new Response("passport contains", false);
-        } catch (NotMinException e) {
-            return new Response(e.getMessage(), false);
-
-
-        }
-    }
-
 }
