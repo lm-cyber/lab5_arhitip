@@ -20,9 +20,7 @@ public class HelpCommad extends Command{
             + "    average_of_height : вывести среднее значение поля height для всех элементов коллекции\n"
             + "    filter_greater_than_height height : вывести элементы, значение поля height которых больше заданного\n"
             + "    print_descending : вывести элементы коллекции в порядке убывания";
-    public HelpCommad(String name,CollectionManager collectionManager) {
-        super(name);
-        this.collectionManager = collectionManager;
+    public HelpCommad() {
     }
     @Override
     public Response execute(Object arg) {
