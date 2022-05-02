@@ -10,16 +10,15 @@ import com.alan.lab.server.utility.FileManager;
 import com.alan.lab.server.utility.HistoryManager;
 import com.alan.lab.server.utility.JsonParser;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.InetSocketAddress;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.PriorityQueue;
+import java.util.logging.FileHandler;
+import java.util.logging.Logger;
 
 public class ServerInstance {
 
@@ -27,6 +26,7 @@ public class ServerInstance {
     private final FileManager fileManager;
     private final CollectionManager collectionManager;
     private final HashSet<ObjectSocketWrapper> clients;
+    private final Logger logger;
 
     private final BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 
@@ -35,6 +35,15 @@ public class ServerInstance {
         this.fileManager = new FileManager(fileName);
         this.responseCreator = new ResponseCreator(new HistoryManager(), collectionManager);
         clients = new HashSet<>();
+        this.logger = Logger.getLogger("log");
+        File lf = new File("server.log");
+        FileHandler fh = null;
+        try {
+            fh = new FileHandler(lf.getAbsolutePath(), true);
+            logger.addHandler(fh);
+        } catch (IOException e) {
+            System.out.println(e.getMessage()+"logger not write in file");
+        }
     }
 
     private void start() {
@@ -54,10 +63,13 @@ public class ServerInstance {
             String command = in.readLine();
             switch (command) {
                 case "save":
+                    logger.info("save");
                     fileManager.write(JsonParser.toJson(collectionManager.getMainData()));
+                    logger.fine("save success");
                     break;
                 case "exit":
                     System.out.println("Shutting down");
+                    logger.fine("exit");
                     return true;
                 default:
                     System.out.println("Unknown command. Available commands are: save, exit");
@@ -67,7 +79,6 @@ public class ServerInstance {
         return false;
     }
 
-    @SuppressWarnings("methodlength")
     public void handleRequests() throws IOException {
         Iterator<ObjectSocketWrapper> it = clients.iterator();
         while (it.hasNext()) {
@@ -76,18 +87,22 @@ public class ServerInstance {
             try {
                 if (client.checkForMessage()) {
                     Object received = client.getPayload();
-
+                    logger.info("get Payload");
                     if (received instanceof RequestWithPerson) {
+                        logger.info("request with person");
                         RequestWithPerson requestWithPerson = (RequestWithPerson) received;
                         Response response;
                         switch (requestWithPerson.getType()) {
                             case ADD:
+                                logger.info("add");
                                 response = responseCreator.add(requestWithPerson.getPerson());
                                 break;
                             case UPDATE:
+                                logger.info("update");
                                 response = responseCreator.update(requestWithPerson.getPerson());
                                 break;
                             case ADD_IF_MIN:
+                                logger.info("add if min");
                                 response = responseCreator.addIfMin(requestWithPerson.getPerson());
                                 break;
                             default:
@@ -97,8 +112,10 @@ public class ServerInstance {
                     } else if (received instanceof Request) {
                         Request request = (Request) received;
                         responseCreator.addHistory(request.getCommandName() + " " + request.getArgs().toString());
+                        logger.info("doing "+request.getCommandName()+ " "+request.getArgs().toString());
                         Response response = responseCreator.executeCommand(request.getCommandName(), request.getArgs());
                         client.sendMessage(response);
+                        logger.fine("send message");
 
                     }
 
@@ -117,6 +134,7 @@ public class ServerInstance {
             channel.bind(new InetSocketAddress(port));
             channel.configureBlocking(false);
             start();
+            logger.info("start");
 
 
             while (true) {
@@ -128,6 +146,7 @@ public class ServerInstance {
                 // Accept pending connections
                 SocketChannel newClient = null;
                 while ((newClient = channel.accept()) != null) {
+                    logger.info("new client");
                     newClient.configureBlocking(false);
                     clients.add(new ObjectSocketWrapper(newClient));
                 }

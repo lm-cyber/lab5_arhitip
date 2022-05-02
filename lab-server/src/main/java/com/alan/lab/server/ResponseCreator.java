@@ -5,9 +5,14 @@ import com.alan.lab.common.exceptions.NotMinException;
 import com.alan.lab.server.utility.CollectionManager;
 import com.alan.lab.server.utility.HistoryManager;
 import com.alan.lab.common.network.Response;
+import com.alan.lab.server.utility.commands.Command;
+
+import java.util.HashSet;
+
 public class ResponseCreator {
     private final HistoryManager historyManager;
     private final CollectionManager collectionManager;
+    private final HashSet<Command> commands;
     private Long lastId;
     private final String helpString = "    help : вывести справку по доступным командам\n"
             + "    info : вывести в стандартный поток вывода информацию о коллекции (тип, дата инициализации, количество элементов и т.д.)\n"
@@ -28,6 +33,8 @@ public class ResponseCreator {
     public ResponseCreator(HistoryManager historyManager, CollectionManager collectionManager) {
         this.historyManager = historyManager;
         this.collectionManager = collectionManager;
+        this.commands = new HashSet<>();
+
     }
 
     public void addHistory(String input) {
@@ -69,7 +76,6 @@ public class ResponseCreator {
 
     }
 
-    @SuppressWarnings("methodlength")
     public Response executeCommand(String name, Object arg) {
         Response response;
         switch (name) {

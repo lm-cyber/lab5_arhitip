@@ -7,13 +7,14 @@ import com.alan.lab.common.network.RequestWithPersonType;
 import com.alan.lab.common.network.Response;
 import com.alan.lab.common.utility.OutputManager;
 import com.alan.lab.common.utility.ParseToNameAndArg;
-import com.alan.lab.common.utility.TerminalColors;
 import com.alan.lab.common.utility.UserInputManager;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.channels.SocketChannel;
+import java.util.logging.FileHandler;
+import java.util.logging.Logger;
 
 public class ConsoleClient {
     private static final int TIMEOUT = 10;
@@ -23,38 +24,32 @@ public class ConsoleClient {
     private String inputPrefix = "> ";
     private ObjectSocketChannelWrapper remote;
     private InetSocketAddress addr;
+    private final Logger logger;
 
     public ConsoleClient(UserInputManager userInputManager, OutputManager outputManager, InetSocketAddress addr) throws IOException {
         this.userInputManager = userInputManager;
         this.outputManager = outputManager;
         this.addr = addr;
+        this.logger = Logger.getLogger("log");
+        File lf = new File("client.log");
+        FileHandler fh = new FileHandler(lf.getAbsolutePath(), true);
+        logger.addHandler(fh);
     }
 
-    private void writeTrace(Exception e) {
-        Throwable t = e;
 
-        while (t != null) {
-            outputManager.println(TerminalColors.colorString(t.toString(), TerminalColors.RED));
-            t = t.getCause();
-        }
-
-        outputManager.println("Use "
-                + TerminalColors.colorString("help [command name]", TerminalColors.GREEN)
-                + " to get more information on usage of commands"
-        );
-    }
 
     private boolean chekInput(String input) throws IOException {
         if ("exit".equals(input)) {
+            logger.fine("success exit");
             return true;
         }
         if (input.startsWith("execute_script")) {
             userInputManager.connectToFile(new File(input.split(" ", 2)[1]));
+            logger.info("change input source");
         }
         return false;
     }
 
-    @SuppressWarnings("methodlength")
     private void inputCycle() {
         boolean addCammand = false;
         RequestWithPersonType type = null;
@@ -78,30 +73,38 @@ public class ConsoleClient {
                     if (addCammand) {
                         Person person = AddElem.add(userInputManager, outputManager);
                         requestWithPerson = new RequestWithPerson(person, type);
+                        logger.info("creating new person");
                     } else {
                         request = new Request(parseToNameAndArg.getName(), parseToNameAndArg.getArg());
                     }
                     if (request != null) {
                         remote.sendMessage(request);
+                        logger.info("send request");
                     } else {
                         remote.sendMessage(requestWithPerson);
+                        logger.info("send request with person");
                     }
                     Response response = waitForResponse();
                     if (response != null) {
                         outputManager.println(response.getMessage());
+                        logger.fine("success got response");
                         addCammand = response.getAddsCommand();
                         if (addCammand) {
+                            logger.info("response with adding");
                             type = RequestWithPersonType.valueOf(parseToNameAndArg.getName().toUpperCase());
                         }
 
                     } else {
+                        logger.severe("request failed");
                         outputManager.println("Request failed");
                     }
                 } catch (NumberFormatException e) {
+                    logger.warning("bad args");
                     outputManager.println("problem with args");
                 }
                 remote.clearInBuffer();
             } catch (IOException e) {
+                logger.severe("IOException with remote");
                 outputManager.println("Caught exception when trying to send request");
                 return;
             }
@@ -111,8 +114,10 @@ public class ConsoleClient {
     public void run() throws IOException {
         try (SocketChannel socket = SocketChannel.open()) {
             if (!connection(socket)) {
+                logger.severe("server dont  response");
                 return;
             }
+            logger.fine("success connection ");
             socket.configureBlocking(false);
             remote = new ObjectSocketChannelWrapper(socket);
 
