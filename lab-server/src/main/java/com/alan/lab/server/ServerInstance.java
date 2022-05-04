@@ -91,23 +91,7 @@ public class ServerInstance {
                     if (received instanceof RequestWithPerson) {
                         logger.info("request with person");
                         RequestWithPerson requestWithPerson = (RequestWithPerson) received;
-                        Response response;
-                        switch (requestWithPerson.getType()) {
-                            case ADD:
-                                logger.info("add");
-                                response = responseCreator.add(requestWithPerson.getPerson());
-                                break;
-                            case UPDATE:
-                                logger.info("update");
-                                response = responseCreator.update(requestWithPerson.getPerson());
-                                break;
-                            case ADD_IF_MIN:
-                                logger.info("add if min");
-                                response = responseCreator.addIfMin(requestWithPerson.getPerson());
-                                break;
-                            default:
-                                response = new Response("something bad", false);
-                        }
+                        Response response = responseCreator.executeCommandWithPerson(requestWithPerson.getType(),requestWithPerson.getPerson());
                         client.sendMessage(response);
                     } else if (received instanceof Request) {
                         Request request = (Request) received;

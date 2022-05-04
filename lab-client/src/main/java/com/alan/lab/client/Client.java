@@ -19,18 +19,19 @@ public final class Client {
             return;
         }
         try {
-            Integer port = Integer.parseInt(args[1]);
-            InetSocketAddress addr = new InetSocketAddress(args[0], port);
-            ConsoleClient console = new ConsoleClient(new UserInputManager(), new OutputManager(), addr);
-            console.run();
+            if(args.length<2) {
+                System.out.println("bat args");
+                return;
+            }
+                Integer port = Integer.parseInt(args[1]);
+                InetSocketAddress addr = new InetSocketAddress(args[0], port);
+                ConsoleClient console = new ConsoleClient(new UserInputManager(), new OutputManager(), addr);
+                console.run();
+
+
 
         } catch (NumberFormatException e) {
             System.out.println("bad port");
-        } catch (IndexOutOfBoundsException e) {
-            System.out.println(
-                    TerminalColors.colorString("Unable to parse host address and port from arguments. You should pass them in as arguments", TerminalColors.RED)
-            );
-            e.printStackTrace();
         } catch (IOException e) {
             System.out.println(
                     TerminalColors.colorString("Failed to launch app", TerminalColors.RED)

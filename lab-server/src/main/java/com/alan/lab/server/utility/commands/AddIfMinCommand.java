@@ -5,8 +5,8 @@ import com.alan.lab.common.exceptions.NotMinException;
 import com.alan.lab.common.network.Response;
 import com.alan.lab.server.utility.CollectionManager;
 
-public class AddIfMin extends CommandWithPerson{
-    public AddIfMin(CollectionManager collectionManager) {
+public class AddIfMinCommand extends CommandWithPerson{
+    public AddIfMinCommand(CollectionManager collectionManager) {
         super(collectionManager);
     }
 
