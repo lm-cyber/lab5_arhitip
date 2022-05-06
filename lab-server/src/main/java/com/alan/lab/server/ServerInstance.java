@@ -10,10 +10,14 @@ import com.alan.lab.server.utility.FileManager;
 import com.alan.lab.server.utility.HistoryManager;
 import com.alan.lab.server.utility.JsonParser;
 
-import java.io.*;
-import java.net.InetSocketAddress;
-import java.nio.channels.ServerSocketChannel;
-import java.nio.channels.SocketChannel;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.PriorityQueue;
@@ -22,8 +26,11 @@ import java.util.logging.Logger;
 
 public class ServerInstance {
 
+    private static final int TIMEOUTWRITE = 100;
+    private static final int SOCKET_TIMEOUT = 10;
     private final ResponseCreator responseCreator;
     private final FileManager fileManager;
+
     private final CollectionManager collectionManager;
     private final HashSet<ObjectSocketWrapper> clients;
     private final Logger logger;
@@ -42,7 +49,7 @@ public class ServerInstance {
             fh = new FileHandler(lf.getAbsolutePath(), true);
             logger.addHandler(fh);
         } catch (IOException e) {
-            System.out.println(e.getMessage()+"logger not write in file");
+            System.out.println(e.getMessage() + "logger not write in file");
         }
     }
 
@@ -91,12 +98,12 @@ public class ServerInstance {
                     if (received instanceof RequestWithPerson) {
                         logger.info("request with person");
                         RequestWithPerson requestWithPerson = (RequestWithPerson) received;
-                        Response response = responseCreator.executeCommandWithPerson(requestWithPerson.getType(),requestWithPerson.getPerson());
+                        Response response = responseCreator.executeCommandWithPerson(requestWithPerson.getType(), requestWithPerson.getPerson());
                         client.sendMessage(response);
                     } else if (received instanceof Request) {
                         Request request = (Request) received;
                         responseCreator.addHistory(request.getCommandName() + " " + request.getArgs().toString());
-                        logger.info("doing "+request.getCommandName()+ " "+request.getArgs().toString());
+                        logger.info("doing " + request.getCommandName() + " " + request.getArgs().toString());
                         Response response = responseCreator.executeCommand(request.getCommandName(), request.getArgs());
                         client.sendMessage(response);
                         logger.fine("send message");
@@ -114,28 +121,28 @@ public class ServerInstance {
     }
 
     public void run(int port) throws IOException {
-        try (ServerSocketChannel channel = ServerSocketChannel.open();) {
-            channel.bind(new InetSocketAddress(port));
-            channel.configureBlocking(false);
+        int check = 0;
+        try (ServerSocket socket = new ServerSocket(port)) {
+            socket.setSoTimeout(SOCKET_TIMEOUT);
             start();
-            logger.info("start");
-
-
+            logger.info("Server is listening on port " + port);
             while (true) {
-                // Accept input from console and stop server if needed
                 if (acceptConsoleInput()) {
                     return;
                 }
-
-                // Accept pending connections
-                SocketChannel newClient = null;
-                while ((newClient = channel.accept()) != null) {
-                    logger.info("new client");
-                    newClient.configureBlocking(false);
-                    clients.add(new ObjectSocketWrapper(newClient));
+                try {
+                    while (true) {
+                        Socket newClient = socket.accept();
+                        newClient.setSoTimeout(SOCKET_TIMEOUT);
+                        logger.info("Received connection from " + newClient.getRemoteSocketAddress());
+                        clients.add(new ObjectSocketWrapper(newClient));
+                    }
+                } catch (SocketTimeoutException e) {
+                    if (check++ >= TIMEOUTWRITE) {
+                        check = 0;
+                        logger.info("time out");
+                    }
                 }
-
-                // Handle new requests
                 handleRequests();
             }
         }

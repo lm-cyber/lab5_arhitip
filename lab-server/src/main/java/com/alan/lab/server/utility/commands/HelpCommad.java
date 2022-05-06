@@ -3,9 +3,9 @@ package com.alan.lab.server.utility.commands;
 import com.alan.lab.common.network.Response;
 import com.alan.lab.server.utility.CollectionManager;
 
-public class HelpCommad extends Command{
+public class HelpCommad extends Command {
     private CollectionManager collectionManager;
-    private final String response =  "    help : вывести справку по доступным командам\n"
+    private final String response = "    help : вывести справку по доступным командам\n"
             + "    info : вывести в стандартный поток вывода информацию о коллекции (тип, дата инициализации, количество элементов и т.д.)\n"
             + "    show : вывести в стандартный поток вывода все элементы коллекции в строковом представлении\n"
             + "    add {element} : добавить новый элемент в коллекцию\n"
@@ -20,10 +20,12 @@ public class HelpCommad extends Command{
             + "    average_of_height : вывести среднее значение поля height для всех элементов коллекции\n"
             + "    filter_greater_than_height height : вывести элементы, значение поля height которых больше заданного\n"
             + "    print_descending : вывести элементы коллекции в порядке убывания";
+
     public HelpCommad() {
     }
+
     @Override
     public Response execute(Object arg) {
-        return new Response(response,false);
+        return new Response(response, false);
     }
 }

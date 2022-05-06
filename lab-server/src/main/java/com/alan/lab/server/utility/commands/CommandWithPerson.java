@@ -10,6 +10,7 @@ public abstract class CommandWithPerson {
     public CommandWithPerson(CollectionManager collectionManager) {
         this.collectionManager = collectionManager;
     }
+
     public Response execute(Person person, Long id) {
         return null;
     }

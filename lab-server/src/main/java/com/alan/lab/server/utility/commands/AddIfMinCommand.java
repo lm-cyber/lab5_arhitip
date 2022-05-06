@@ -5,14 +5,14 @@ import com.alan.lab.common.exceptions.NotMinException;
 import com.alan.lab.common.network.Response;
 import com.alan.lab.server.utility.CollectionManager;
 
-public class AddIfMinCommand extends CommandWithPerson{
+public class AddIfMinCommand extends CommandWithPerson {
     public AddIfMinCommand(CollectionManager collectionManager) {
         super(collectionManager);
     }
 
     @Override
     public Response execute(Person person, Long id) {
-         try {
+        try {
             if (collectionManager.addMin(person)) {
                 return new Response("add success", false);
             }

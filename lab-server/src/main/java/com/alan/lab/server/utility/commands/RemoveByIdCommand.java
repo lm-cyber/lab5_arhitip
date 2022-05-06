@@ -7,7 +7,7 @@ public class RemoveByIdCommand extends Command {
 
     private final CollectionManager collectionManager;
 
-    public RemoveByIdCommand( CollectionManager collectionManager) {
+    public RemoveByIdCommand(CollectionManager collectionManager) {
         this.collectionManager = collectionManager;
     }
 

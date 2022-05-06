@@ -6,7 +6,7 @@ import com.alan.lab.server.utility.CollectionManager;
 public class RemoveHeadCommand extends Command {
     private final CollectionManager collectionManager;
 
-    public RemoveHeadCommand( CollectionManager collectionManager) {
+    public RemoveHeadCommand(CollectionManager collectionManager) {
         this.collectionManager = collectionManager;
     }
 
