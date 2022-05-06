@@ -9,6 +9,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
+import java.util.NoSuchElementException;
 import java.util.Scanner;
 import java.util.Stack;
 import java.util.function.Predicate;
@@ -169,25 +170,29 @@ public class UserInputManager implements AutoCloseable {
 
 
     public String nextLine() {
-        if (!currentFilesReaders.isEmpty()) {
-            try {
-                String input = currentFilesReaders.peek().readLine();
-                if (input == null) {
-                    currentFiles.pop();
-                    currentFilesReaders.pop().close();
-                    return nextLine();
-                } else {
-                    return input;
+        try {
+            if (!currentFilesReaders.isEmpty()) {
+                try {
+                    String input = currentFilesReaders.peek().readLine();
+                    if (input == null) {
+                        currentFiles.pop();
+                        currentFilesReaders.pop().close();
+                        return nextLine();
+                    } else {
+                        return input;
+                    }
+
+
+                } catch (IOException e) {
+                    throw new RuntimeException("????");
                 }
 
-
-            } catch (IOException e) {
-                throw new RuntimeException("????");
+            } else {
+                chekrek = false;
+                return scanner.nextLine();
             }
-
-        } else {
-            chekrek = false;
-            return scanner.nextLine();
+        } catch (NoSuchElementException e) {
+            return "exit";
         }
     }
 

@@ -48,7 +48,7 @@ public class ObjectSocketWrapper {
             payloadBufferPos += readBytes;
 
             return payloadBufferPos >= payloadBuffer.length;
-        } catch (SocketTimeoutException e) {
+        } catch (SocketTimeoutException | IndexOutOfBoundsException e) {
             return false;
         }
     }

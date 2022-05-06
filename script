@@ -3,10 +3,13 @@ info
 show
 average_of_height
 filter_greater_than_height 1
+filter_greater_than_height adsads
 history
 print_descending
 show
 execute_script script1
+execute_script dasadsdas
+update adsadas
 
 
 help
