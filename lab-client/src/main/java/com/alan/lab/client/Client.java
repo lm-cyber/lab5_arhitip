@@ -19,15 +19,14 @@ public final class Client {
             return;
         }
         try {
-            if(args.length<2) {
+            if (args.length < 2) {
                 System.out.println("bat args");
                 return;
             }
-                Integer port = Integer.parseInt(args[1]);
-                InetSocketAddress addr = new InetSocketAddress(args[0], port);
-                ConsoleClient console = new ConsoleClient(new UserInputManager(), new OutputManager(), addr);
-                console.run();
-
+            Integer port = Integer.parseInt(args[1]);
+            InetSocketAddress addr = new InetSocketAddress(args[0], port);
+            ConsoleClient console = new ConsoleClient(new UserInputManager(), new OutputManager(), addr);
+            console.run();
 
 
         } catch (NumberFormatException e) {

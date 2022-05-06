@@ -6,18 +6,18 @@ public class ParseToNameAndArg {
     public ParseToNameAndArg(String line) {
         String[] lineSplit = line.split(" ", 2);
         this.name = lineSplit[0];
-        if(lineSplit.length!=2) {
+        if (lineSplit.length != 2) {
             this.arg = "";
             return;
         }
         switch (name) {
-            case "update" :
+            case "update":
                 this.arg = Long.parseLong(lineSplit[1]);
                 break;
-            case"remove_by_id":
+            case "remove_by_id":
                 this.arg = Long.parseLong(lineSplit[1]);
                 break;
-            case "filter_greater_than_height" :
+            case "filter_greater_than_height":
                 this.arg = Float.parseFloat(lineSplit[1]);
                 break;
             default:

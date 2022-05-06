@@ -37,8 +37,7 @@ public class ConsoleClient {
     }
 
 
-
-    private boolean chekInput(String input) throws IOException {
+    private boolean exitOrSourceChangeChecker(String input) throws IOException {
         if ("exit".equals(input)) {
             logger.fine("success exit");
             return true;
@@ -50,53 +49,62 @@ public class ConsoleClient {
         return false;
     }
 
+    private boolean responseHandler() throws IOException {
+
+        boolean addCommand = false;
+        Response response = waitForResponse();
+        if (response != null) {
+            outputManager.println(response.getMessage().toString());
+            logger.fine("success got response");
+            addCommand = response.getAddsCommand();
+            if (addCommand) {
+                logger.info("response with adding");
+            }
+        } else {
+            logger.severe("request failed");
+            outputManager.println("Request failed");
+        }
+        return addCommand;
+    }
+    private void sendRequestWithPerson(RequestWithPersonType type) throws IOException {
+        RequestWithPerson requestWithPerson;
+        Person person = AddElem.add(userInputManager, outputManager);
+        requestWithPerson = new RequestWithPerson(person, type);
+        logger.info("creating new person");
+        remote.sendMessage(requestWithPerson);
+        logger.info("send request with person");
+    }
+    private void sendRequest(ParseToNameAndArg parseToNameAndArg) throws IOException {
+        Request request = new Request(parseToNameAndArg.getName(), parseToNameAndArg.getArg());
+                        remote.sendMessage(request);
+                        logger.info("send request");
+    }
+
     private void inputCycle() {
-        boolean addCammand = false;
+        Boolean addCommand = false;
         RequestWithPersonType type = null;
         String input = null;
         boolean shouldContinue = true;
         while (shouldContinue) {
-            if (!addCammand) {
+            if (!addCommand) {
                 input = userInputManager.nextLine();
-                if (input == null) {
-                    shouldContinue = false;
-                }
             }
             try {
-                if (chekInput(input)) {
+                if (exitOrSourceChangeChecker(input)) {
                     return;
                 }
                 Request request = null;
                 RequestWithPerson requestWithPerson = null;
                 try {
                     ParseToNameAndArg parseToNameAndArg = new ParseToNameAndArg(input);
-                    if (addCammand) {
-                        Person person = AddElem.add(userInputManager, outputManager);
-                        requestWithPerson = new RequestWithPerson(person, type);
-                        logger.info("creating new person");
+                    if (addCommand) {
+                        sendRequestWithPerson(type);
                     } else {
-                        request = new Request(parseToNameAndArg.getName(), parseToNameAndArg.getArg());
+                        sendRequest(parseToNameAndArg);
                     }
-                    if (request != null) {
-                        remote.sendMessage(request);
-                        logger.info("send request");
-                    } else {
-                        remote.sendMessage(requestWithPerson);
-                        logger.info("send request with person");
-                    }
-                    Response response = waitForResponse();
-                    if (response != null) {
-                        outputManager.println(response.getMessage().toString());
-                        logger.fine("success got response");
-                        addCammand = response.getAddsCommand();
-                        if (addCammand) {
-                            logger.info("response with adding");
-                            type = RequestWithPersonType.valueOf(parseToNameAndArg.getName().toUpperCase());
-                        }
-
-                    } else {
-                        logger.severe("request failed");
-                        outputManager.println("Request failed");
+                    addCommand = responseHandler();
+                    if (addCommand) {
+                        type = RequestWithPersonType.valueOf(parseToNameAndArg.getName().toUpperCase());
                     }
                 } catch (NumberFormatException e) {
                     logger.warning("bad args");
