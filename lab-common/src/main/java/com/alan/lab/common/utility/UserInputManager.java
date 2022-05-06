@@ -181,8 +181,6 @@ public class UserInputManager implements AutoCloseable {
                     } else {
                         return input;
                     }
-
-
                 } catch (IOException e) {
                     throw new RuntimeException("????");
                 }

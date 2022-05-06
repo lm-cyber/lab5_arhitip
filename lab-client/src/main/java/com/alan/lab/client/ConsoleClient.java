@@ -10,6 +10,7 @@ import com.alan.lab.common.utility.ParseToNameAndArg;
 import com.alan.lab.common.utility.UserInputManager;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.channels.SocketChannel;
@@ -44,7 +45,11 @@ public class ConsoleClient {
             return true;
         }
         if (input.startsWith("execute_script")) {
-            userInputManager.connectToFile(new File(input.split(" ", 2)[1]));
+            try {
+                userInputManager.connectToFile(new File(input.split(" ", 2)[1]));
+            } catch (FileNotFoundException e) {
+                logger.severe("cant connect");
+            }
             logger.info("change input source");
         }
         return false;
@@ -94,8 +99,6 @@ public class ConsoleClient {
                 if (exitOrSourceChangeChecker(input)) {
                     return;
                 }
-                Request request = null;
-                RequestWithPerson requestWithPerson = null;
                 try {
                     ParseToNameAndArg parseToNameAndArg = new ParseToNameAndArg(input);
                     if (addCommand) {
