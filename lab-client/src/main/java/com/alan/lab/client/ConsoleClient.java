@@ -18,6 +18,7 @@ import java.util.logging.Logger;
 
 public class ConsoleClient {
     private static final int TIMEOUT = 10;
+    private static final int TIMEOUTMS = 100;
     private static final int MILLIS_IN_SECONDS = 1000;
     private final UserInputManager userInputManager;
     private final OutputManager outputManager;
@@ -138,7 +139,7 @@ public class ConsoleClient {
         long start = System.currentTimeMillis();
         while (second < TIMEOUT) {
             try {
-                socket.connect(addr);
+                socket.socket().connect(addr, TIMEOUTMS);
                 return true;
             } catch (IOException e) {
 

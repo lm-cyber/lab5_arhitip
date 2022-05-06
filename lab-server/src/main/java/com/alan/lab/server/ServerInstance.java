@@ -53,15 +53,12 @@ public class ServerInstance {
         }
     }
 
-    private void start() {
+    private void start() throws FileNotFoundException {
         StringBuilder stringData = null;
-        try {
-            stringData = fileManager.read();
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
-        }
+        PriorityQueue<Person> people;
+        stringData = fileManager.read();
+        people = new PriorityQueue<>(JsonParser.toData(String.valueOf(stringData)));
 
-        PriorityQueue<Person> people = JsonParser.toData(String.valueOf(stringData));
         collectionManager.initialiseData(people);
     }
 
