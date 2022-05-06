@@ -86,7 +86,7 @@ public class ConsoleClient {
                     }
                     Response response = waitForResponse();
                     if (response != null) {
-                        outputManager.println(response.getMessage());
+                        outputManager.println(response.getMessage().toString());
                         logger.fine("success got response");
                         addCammand = response.getAddsCommand();
                         if (addCammand) {

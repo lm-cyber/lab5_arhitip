@@ -12,7 +12,7 @@ public class AverageOfHeightCommand extends Command{
 
     @Override
     public Response execute(Object argOrData) {
-        return new Response(collectionManager.averageHeight().toString(),false);
+        return new Response(collectionManager.averageHeight(),false);
 
     }
 }

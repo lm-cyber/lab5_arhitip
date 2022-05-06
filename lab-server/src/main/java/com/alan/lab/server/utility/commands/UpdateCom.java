@@ -12,10 +12,12 @@ public class UpdateCom extends Command{
 
     @Override
     public Response execute(Object argOrData) {
-        if(collectionManager.isHaveId((Long) argOrData)) {
-            return new Response("starting update ",true);
+        if (argOrData instanceof Long) {
+            if (collectionManager.isHaveId((Long) argOrData)) {
+                return new Response("starting update ", true);
+            }
+            return new Response("havent id", false);
         }
-        return new Response("havent id",false);
-
+        return new Response("bad arg",false);
     }
 }

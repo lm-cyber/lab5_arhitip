@@ -3,11 +3,11 @@ package com.alan.lab.common.network;
 import java.io.Serializable;
 
 public class Response implements Serializable {
-    private static final long serialVersionUID = -6966872113588366076L;
-    private String message = "";
+    private static final long serialVersionUID = 7245430527055132764L;
+    private Object message;
     private boolean addsCommand;
 
-    public Response(String message, boolean addsCommand) {
+    public Response(Object message, boolean addsCommand) {
         this.message = message;
         this.addsCommand = addsCommand;
     }
@@ -16,7 +16,7 @@ public class Response implements Serializable {
         return addsCommand;
     }
 
-    public String getMessage() {
+    public Object getMessage() {
         return message;
     }
 }

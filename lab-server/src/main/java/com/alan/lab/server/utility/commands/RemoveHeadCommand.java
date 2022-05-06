@@ -17,7 +17,7 @@ public class RemoveHeadCommand extends Command {
             response = new Response("is empty ,cant remove_head", false);
         } else {
 
-            response = new Response(collectionManager.poll().toString(), false);
+            response = new Response(collectionManager.poll(), false);
         }
         return response;
     }

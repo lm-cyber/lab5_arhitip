@@ -6,6 +6,10 @@ public class ParseToNameAndArg {
     public ParseToNameAndArg(String line) {
         String[] lineSplit = line.split(" ", 2);
         this.name = lineSplit[0];
+        if(lineSplit.length!=2) {
+            this.arg = "";
+            return;
+        }
         switch (name) {
             case "update" :
                 this.arg = Long.parseLong(lineSplit[1]);
