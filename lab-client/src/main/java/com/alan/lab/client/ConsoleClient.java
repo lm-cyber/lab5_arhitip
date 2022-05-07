@@ -14,6 +14,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.channels.SocketChannel;
+import java.util.Collection;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 
@@ -54,13 +55,27 @@ public class ConsoleClient {
         }
         return false;
     }
+    private void responseFormating(Collection list) {
+        Integer count = 0;
+        for (Object person : list) {
+            outputManager.println("___________________________________________________________");
+            outputManager.println(person.toString());
+            outputManager.println(count.toString() + " " + count.toString() + " " + count.toString());
+            count++;
+        }
+
+    }
 
     private boolean responseHandler() throws IOException {
 
         boolean addCommand = false;
         Response response = waitForResponse();
         if (response != null) {
-            outputManager.println(response.getMessage().toString());
+            if (response.getMessage() instanceof Collection) {
+                responseFormating((Collection) response.getMessage());
+            } else {
+                outputManager.println(response.getMessage().toString());
+            }
             logger.fine("success got response");
             addCommand = response.getAddsCommand();
             if (addCommand) {
