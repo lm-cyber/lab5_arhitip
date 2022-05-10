@@ -56,11 +56,11 @@ public class ConsoleClient {
         return false;
     }
     private void responseFormating(Collection list) {
-        Integer count = 0;
+        int count = 0;
         for (Object person : list) {
             outputManager.println("___________________________________________________________");
             outputManager.println(person.toString());
-            outputManager.println(count.toString() + " " + count.toString() + " " + count.toString());
+            outputManager.println(Integer.toString(count) + " " + Integer.toString(count) + " " + Integer.toString(count));
             count++;
         }
 
