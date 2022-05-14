@@ -34,7 +34,10 @@ public class CollectionManager {
     }
     public boolean update(Person person) {
         removeByID(person.getId());
-        return add(person);
+        ids.add(person.getId());
+        passwordIds.add(person.getPassportID());
+        mainData.add(person);
+        return true;
     }
 
     public LocalDate getCreationDate() {
