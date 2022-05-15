@@ -13,6 +13,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.nio.channels.IllegalBlockingModeException;
 import java.nio.channels.SocketChannel;
 import java.util.Collection;
 import java.util.logging.FileHandler;
@@ -43,6 +44,7 @@ public class ConsoleClient {
     private boolean exitOrSourceChangeChecker(String input) throws IOException {
         if ("exit".equals(input)) {
             logger.fine("success exit");
+            System.exit(0);
             return true;
         }
         if (input.startsWith("execute_script")) {
@@ -131,9 +133,11 @@ public class ConsoleClient {
                 }
                 remote.clearInBuffer();
             } catch (IOException e) {
-                logger.severe("IOException with remote");
-                outputManager.println("Caught exception when trying to send request");
-                return;
+                if (!waitForReconnection()) {
+                    logger.severe("IOException with remote");
+                    outputManager.println("Caught exception when trying to send request");
+                    return;
+                }
             }
         }
     }
@@ -159,7 +163,7 @@ public class ConsoleClient {
             try {
                 socket.socket().connect(addr, TIMEOUTMS);
                 return true;
-            } catch (IOException e) {
+            } catch (IOException | IllegalBlockingModeException e) {
 
                 if (System.currentTimeMillis() >= start + (long) (second + 1) * MILLIS_IN_SECONDS) {
                     outputManager.print(".");
@@ -192,4 +196,13 @@ public class ConsoleClient {
         outputManager.println("Timed out after " + TIMEOUT + " seconds.");
         return null;
     }
+     private boolean waitForReconnection() {
+         outputManager.println("starting to reconnection");
+         try {
+             run();
+             return true;
+         } catch (IOException e) {
+             return false;
+         }
+     }
 }
