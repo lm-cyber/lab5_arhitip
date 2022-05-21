@@ -15,7 +15,9 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.channels.IllegalBlockingModeException;
 import java.nio.channels.SocketChannel;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 
@@ -29,27 +31,45 @@ public class ConsoleClient {
     private ObjectSocketChannelWrapper remote;
     private InetSocketAddress addr;
     private final Logger logger;
+    private List<String> args;
 
     public ConsoleClient(UserInputManager userInputManager, OutputManager outputManager, InetSocketAddress addr) throws IOException {
         this.userInputManager = userInputManager;
         this.outputManager = outputManager;
         this.addr = addr;
+        this.args = new ArrayList<>();
         this.logger = Logger.getLogger("log");
         File lf = new File("client.log");
         FileHandler fh = new FileHandler(lf.getAbsolutePath(), true);
         logger.addHandler(fh);
+
     }
 
-
+    private void changeSource(String arg) throws IOException {
+        if (!userInputManager.getChekReg()) {
+            args.clear();
+        }
+        if (args.contains(arg)) {
+            logger.severe("recursive");
+            return;
+        }
+        args.add(arg);
+        userInputManager.connectToFile(new File(arg));
+        logger.fine("change source");
+    }
     private boolean exitOrSourceChangeChecker(String input) throws IOException {
         if ("exit".equals(input)) {
             logger.fine("success exit");
             System.exit(0);
-            return true;
+            return false;
         }
         if (input.startsWith("execute_script")) {
             try {
-                userInputManager.connectToFile(new File(input.split(" ", 2)[1]));
+                if (input.split(" ", 2).length == 2) {
+                    changeSource(input.split(" ", 2)[1]);
+                }
+                return true;
+
             } catch (FileNotFoundException e) {
                 logger.severe("cant connect");
             }
@@ -104,7 +124,7 @@ public class ConsoleClient {
     }
 
     private void inputCycle() {
-        Boolean addCommand = false;
+        boolean addCommand = false;
         RequestWithPersonType type = null;
         String input = null;
         boolean shouldContinue = true;
@@ -114,7 +134,7 @@ public class ConsoleClient {
             }
             try {
                 if (exitOrSourceChangeChecker(input)) {
-                    return;
+                    continue;
                 }
                 try {
                     ParseToNameAndArg parseToNameAndArg = new ParseToNameAndArg(input);
