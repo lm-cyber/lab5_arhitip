@@ -13,7 +13,7 @@ public class RemoveByIdCommand extends Command {
 
     public Response execute(Object arg) {
         Response response;
-        if (!collectionManager.removeByID((Long) arg)) {
+        if (collectionManager.removeByID((Long) arg)) {
             response = new Response("delete success", false);
         } else {
             response = new Response("havent id", false);
