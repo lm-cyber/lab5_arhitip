@@ -9,9 +9,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
-import java.util.NoSuchElementException;
-import java.util.Scanner;
-import java.util.Stack;
+import java.util.*;
 import java.util.function.Predicate;
 
 /**
@@ -22,6 +20,8 @@ public class UserInputManager implements AutoCloseable {
     private final Stack<BufferedReader> currentFilesReaders = new Stack<>();
     private final Stack<File> currentFiles = new Stack<>();
     private boolean chekrek = false;
+
+    private List<String> args = new ArrayList<>();
 
     public Long readLongValue(String message, OutputManager outputManager) {
         boolean shouldContinue = true;
@@ -168,7 +168,16 @@ public class UserInputManager implements AutoCloseable {
         return passportId;
     }
 
-
+    public void changeSource(String arg) throws IOException {
+        if (!getChekReg()) {
+            args.clear();
+        }
+        if (args.contains(arg)) {
+            return;
+        }
+        args.add(arg);
+        connectToFile(new File(arg));
+    }
     public String nextLine() {
         try {
             if (!currentFilesReaders.isEmpty()) {
