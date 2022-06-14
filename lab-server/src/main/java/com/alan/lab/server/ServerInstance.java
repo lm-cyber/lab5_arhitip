@@ -5,8 +5,10 @@ import com.alan.lab.common.data.Person;
 import com.alan.lab.common.network.Request;
 import com.alan.lab.common.network.RequestWithPerson;
 import com.alan.lab.common.network.Response;
-import com.alan.lab.server.utility.CollectionManager;
-import com.alan.lab.server.utility.FileManager;
+import com.alan.lab.common.utility.nonstandardcommand.NonStandardCommand;
+import com.alan.lab.server.utility.NonStandardCommandServer;
+import com.alan.lab.server.utility.collectionmanagers.CollectionManager;
+import com.alan.lab.server.utility.collectionmanagers.FileManager;
 import com.alan.lab.server.utility.HistoryManager;
 import com.alan.lab.server.utility.JsonParser;
 
@@ -34,6 +36,7 @@ public class ServerInstance {
     private final CollectionManager collectionManager;
     private final HashSet<ObjectSocketWrapper> clients;
     private final Logger logger;
+    private final NonStandardCommand nonStandardCommandServer;
 
     private final BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 
@@ -43,6 +46,7 @@ public class ServerInstance {
         this.responseCreator = new ResponseCreator(new HistoryManager(), collectionManager);
         clients = new HashSet<>();
         this.logger = Logger.getLogger("log");
+        this.nonStandardCommandServer = new NonStandardCommandServer(collectionManager, logger, in, fileManager);
         File lf = new File("server.log");
         FileHandler fh = null;
         try {
@@ -62,26 +66,6 @@ public class ServerInstance {
         collectionManager.initialiseData(people);
     }
 
-    private boolean acceptConsoleInput() throws IOException {
-        if (System.in.available() > 0) {
-            String command = in.readLine();
-            switch (command) {
-                case "save":
-                    logger.info("save");
-                    fileManager.write(JsonParser.toJson(collectionManager.getMainData()));
-                    logger.fine("save success");
-                    break;
-                case "exit":
-                    System.out.println("Shutting down");
-                    logger.fine("exit");
-                    return true;
-                default:
-                    System.out.println("Unknown command. Available commands are: save, exit");
-            }
-        }
-
-        return false;
-    }
 
     public void handleRequests() throws IOException {
         Iterator<ObjectSocketWrapper> it = clients.iterator();
@@ -124,7 +108,7 @@ public class ServerInstance {
             start();
             logger.info("Server is listening on port " + port);
             while (true) {
-                if (acceptConsoleInput()) {
+                if (nonStandardCommandServer.execute(null)) {
                     return;
                 }
                 try {

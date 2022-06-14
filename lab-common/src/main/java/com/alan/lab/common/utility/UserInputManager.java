@@ -9,7 +9,11 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Scanner;
+import java.util.Stack;
 import java.util.function.Predicate;
 
 /**
@@ -178,6 +182,7 @@ public class UserInputManager implements AutoCloseable {
         args.add(arg);
         connectToFile(new File(arg));
     }
+
     public String nextLine() {
         try {
             if (!currentFilesReaders.isEmpty()) {

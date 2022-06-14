@@ -1,4 +1,4 @@
-package com.alan.lab.server.utility;
+package com.alan.lab.server.utility.collectionmanagers;
 
 import com.alan.lab.common.data.Person;
 import com.alan.lab.common.exceptions.NotMinException;

@@ -2,7 +2,7 @@ package com.alan.lab.server.utility.commands;
 
 import com.alan.lab.common.data.Person;
 import com.alan.lab.common.network.Response;
-import com.alan.lab.server.utility.CollectionManager;
+import com.alan.lab.server.utility.collectionmanagers.CollectionManager;
 
 public class AddCommand extends CommandWithPerson {
     public AddCommand(CollectionManager collectionManager) {

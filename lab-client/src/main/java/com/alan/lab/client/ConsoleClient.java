@@ -5,12 +5,13 @@ import com.alan.lab.common.network.Request;
 import com.alan.lab.common.network.RequestWithPerson;
 import com.alan.lab.common.network.RequestWithPersonType;
 import com.alan.lab.common.network.Response;
+import com.alan.lab.common.users.AuthCredentials;
 import com.alan.lab.common.utility.OutputManager;
 import com.alan.lab.common.utility.ParseToNameAndArg;
 import com.alan.lab.common.utility.UserInputManager;
+import com.alan.lab.common.utility.nonstandardcommand.NonStandardCommand;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.channels.IllegalBlockingModeException;
@@ -25,16 +26,17 @@ public class ConsoleClient {
     private static final int MILLIS_IN_SECONDS = 1000;
     private final UserInputManager userInputManager;
     private final OutputManager outputManager;
-    private String inputPrefix = "> ";
     private ObjectSocketChannelWrapper remote;
     private InetSocketAddress addr;
     private final Logger logger;
-
+    private final NonStandardCommand nonStandardCommandClient;
+    private RequestCreator requestCreator;
     public ConsoleClient(UserInputManager userInputManager, OutputManager outputManager, InetSocketAddress addr) throws IOException {
         this.userInputManager = userInputManager;
         this.outputManager = outputManager;
         this.addr = addr;
         this.logger = Logger.getLogger("log");
+        this.nonStandardCommandClient = new NonStandardCommandClient(userInputManager, logger);
         File lf = new File("client.log");
         FileHandler fh = new FileHandler(lf.getAbsolutePath(), true);
         logger.addHandler(fh);
@@ -42,26 +44,7 @@ public class ConsoleClient {
     }
 
 
-    private boolean exitOrSourceChangeChecker(String input) throws IOException {
-        if ("exit".equals(input)) {
-            logger.fine("success exit");
-            System.exit(0);
-            return false;
-        }
-        if (input.startsWith("execute_script")) {
-            try {
-                if (input.split(" ", 2).length == 2) {
-                    userInputManager.changeSource(input.split(" ", 2)[1]);
-                }
-                return true;
 
-            } catch (FileNotFoundException e) {
-                logger.severe("cant connect");
-            }
-            logger.info("change input source");
-        }
-        return false;
-    }
     private void responseFormating(Collection list) {
         int count = 0;
         for (Object person : list) {
@@ -109,29 +92,20 @@ public class ConsoleClient {
     }
 
     private void inputCycle() {
-        boolean addCommand = false;
         RequestWithPersonType type = null;
-        String input = null;
-        boolean shouldContinue = true;
-        while (shouldContinue) {
+        boolean addCommand = false;
+        String input = "";
+        while (input != null) {
             if (!addCommand) {
                 input = userInputManager.nextLine();
             }
             try {
-                if (exitOrSourceChangeChecker(input)) {
+                if (nonStandardCommandClient.execute(input)) {
                     continue;
                 }
                 try {
-                    ParseToNameAndArg parseToNameAndArg = new ParseToNameAndArg(input);
-                    if (addCommand) {
-                        sendRequestWithPerson(type);
-                    } else {
-                        sendRequest(parseToNameAndArg);
-                    }
+                    requestCreator.requestCreate(input, addCommand);
                     addCommand = responseHandler();
-                    if (addCommand) {
-                        type = RequestWithPersonType.valueOf(parseToNameAndArg.getName().toUpperCase());
-                    }
                 } catch (NumberFormatException e) {
                     logger.warning("bad args");
                     outputManager.println("problem with args");
@@ -156,10 +130,20 @@ public class ConsoleClient {
             logger.fine("success connection ");
             socket.configureBlocking(false);
             remote = new ObjectSocketChannelWrapper(socket);
+            this.requestCreator = new RequestCreator(remote, userInputManager, outputManager);
 
             inputCycle();
         }
     }
+
+    public AuthCredentials changeUser() {
+        outputManager.print("login :");
+        String login = userInputManager.nextLine();
+        outputManager.print("password :");
+        String password = userInputManager.nextLine();
+        return new AuthCredentials(login, password);
+    }
+
 
     private boolean connection(SocketChannel socket) {
         int second = 0;

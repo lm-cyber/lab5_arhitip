@@ -1,4 +1,4 @@
-package com.alan.lab.server.utility;
+package com.alan.lab.server.utility.collectionmanagers;
 
 import java.io.File;
 import java.io.FileNotFoundException;

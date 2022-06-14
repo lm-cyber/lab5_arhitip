@@ -3,7 +3,7 @@ package com.alan.lab.server;
 import com.alan.lab.common.data.Person;
 import com.alan.lab.common.network.RequestWithPersonType;
 import com.alan.lab.common.network.Response;
-import com.alan.lab.server.utility.CollectionManager;
+import com.alan.lab.server.utility.collectionmanagers.CollectionManager;
 import com.alan.lab.server.utility.HistoryManager;
 import com.alan.lab.server.utility.commands.AddCom;
 import com.alan.lab.server.utility.commands.AddCommand;
