@@ -6,6 +6,7 @@ import com.alan.lab.server.utility.collectionmanagers.FileManager;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.logging.Logger;
 
 public class NonStandardCommandServer implements NonStandardCommand {
@@ -14,10 +15,10 @@ public class NonStandardCommandServer implements NonStandardCommand {
     private final BufferedReader in;
     private final FileManager fileManager;
 
-    public NonStandardCommandServer(CollectionManager collectionManager, Logger logger, BufferedReader in, FileManager fileManager) {
+    public NonStandardCommandServer(CollectionManager collectionManager, Logger logger, FileManager fileManager) {
         this.collectionManager = collectionManager;
         this.logger = logger;
-        this.in = in;
+        this.in = new BufferedReader(new InputStreamReader(System.in));
         this.fileManager = fileManager;
     }
 

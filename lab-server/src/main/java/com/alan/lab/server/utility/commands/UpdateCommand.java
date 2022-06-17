@@ -11,9 +11,9 @@ public class UpdateCommand extends CommandWithPerson {
     }
 
     @Override
-    public Response execute(Person person, Long id) {
+    public Response execute(Person person, Long id, Long userID) {
         person.setId(id);
-        if (collectionManager.update(person, id)) {
+        if (collectionManager.update(person, id, userID)) {
             return new Response("add success", false, true);
         }
         return new Response("contains passport or you not ownerq", false, true);

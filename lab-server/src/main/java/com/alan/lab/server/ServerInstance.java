@@ -6,18 +6,16 @@ import com.alan.lab.common.network.Request;
 import com.alan.lab.common.network.RequestWithPerson;
 import com.alan.lab.common.network.Response;
 import com.alan.lab.common.utility.nonstandardcommand.NonStandardCommand;
-import com.alan.lab.server.utility.usermanagers.SqlUserManager;
+import com.alan.lab.server.utility.HistoryManager;
+import com.alan.lab.server.utility.JsonParser;
 import com.alan.lab.server.utility.NonStandardCommandServer;
 import com.alan.lab.server.utility.collectionmanagers.CollectionManager;
 import com.alan.lab.server.utility.collectionmanagers.FileManager;
-import com.alan.lab.server.utility.HistoryManager;
-import com.alan.lab.server.utility.JsonParser;
+import com.alan.lab.server.utility.usermanagers.SqlUserManager;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
@@ -44,14 +42,13 @@ public class ServerInstance {
     private SqlUserManager sqlUserManager;
     private Connection connection;
 
-    private final BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 
     public ServerInstance(String fileName) {
         this.collectionManager = new CollectionManager();
         this.fileManager = new FileManager(fileName);
         clients = new HashSet<>();
         this.logger = Logger.getLogger("log");
-        this.nonStandardCommandServer = new NonStandardCommandServer(collectionManager, logger, in, fileManager);
+        this.nonStandardCommandServer = new NonStandardCommandServer(collectionManager, logger, fileManager);
         File lf = new File("server.log");
         FileHandler fh = null;
         try {
@@ -136,7 +133,6 @@ public class ServerInstance {
                 } catch (SocketTimeoutException e) {
                     if (check++ >= TIMEOUTWRITE) {
                         check = 0;
-                        logger.info("time out");
                     }
                 }
                 handleRequests();

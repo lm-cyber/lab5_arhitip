@@ -4,11 +4,7 @@ import com.alan.lab.common.data.Person;
 import com.alan.lab.common.exceptions.NotMinException;
 
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.OptionalDouble;
-import java.util.PriorityQueue;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class CollectionManager {
@@ -32,17 +28,11 @@ public class CollectionManager {
         passwordIds.clear();
         mainData.clear();
     }
-    public boolean update(Person person, Long userID) {
-
-        if(isHaveId(person.getId())) {
-            return false;
-        }
-        if(!person.getOwnerID().equals(userID)) {
-            return false;
-        }
-
-        removeByID(person.getId(), userID);
-        ids.add(person.getId());
+    public boolean update(Person person, Long id, Long userID) {
+        person.setId(id);
+        person.setOwnerID(userID);;
+        removeByID(id, userID);
+        ids.add(id);
         passwordIds.add(person.getPassportID());
         mainData.add(person);
         return true;
@@ -71,17 +61,18 @@ public class CollectionManager {
         return iterId;
     }
 
-    public boolean addMin(Person person) throws NotMinException {
+    public boolean addMin(Person person, Long userID) throws NotMinException {
         if (getMinHeight() > person.getHeight()) {
-         return    add(person);
+         return    add(person, userID);
         } else {
             throw new NotMinException();
         }
 
     }
 
-    public boolean add(Person person) {
+    public boolean add(Person person, Long userID) {
         if (!isContains(person.getPassportID())) {
+            person.setOwnerID(userID);
             person.setId(getNewID());
             ids.add(person.getId());
             passwordIds.add(person.getPassportID());

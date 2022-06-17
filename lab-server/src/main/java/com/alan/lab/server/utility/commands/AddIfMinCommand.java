@@ -12,9 +12,9 @@ public class AddIfMinCommand extends CommandWithPerson {
     }
 
     @Override
-    public Response execute(Person person, Long id) {
+    public Response execute(Person person, Long id, Long userID) {
         try {
-            if (collectionManager.addMin(person)) {
+            if (collectionManager.addMin(person, userID)) {
                 return new Response("add success", false, true);
             }
             return new Response("passport contains", false, true);

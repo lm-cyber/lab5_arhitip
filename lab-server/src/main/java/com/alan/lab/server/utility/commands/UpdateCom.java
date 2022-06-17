@@ -14,10 +14,10 @@ public class UpdateCom extends Command {
     public Response execute(Object argOrData, Long userID) {
         if (argOrData instanceof Long) {
             if (collectionManager.isHaveId((Long) argOrData) && collectionManager.checkOwner((Long) argOrData,userID)) {
-                return new Response("starting update ", true);
+                return new Response("starting update ", true, true);
             }
-            return new Response("havent id or you not owner", false);
+            return new Response("havent id or you not owner", false, true);
         }
-        return new Response("bad arg", false);
+        return new Response("bad arg", false, true);
     }
 }

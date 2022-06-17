@@ -20,7 +20,7 @@ public abstract class CommandWithPerson {
         this.sqlUserManager = sqlUserManager;
     }
 
-    public Response execute(Person person, Long id) {
+    public Response execute(Person person, Long id, Long userID) {
         return null;
     }
 }

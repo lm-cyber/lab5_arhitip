@@ -66,6 +66,6 @@ public class ResponseCreator {
 
 
     public Response executeCommandWithPerson(RequestWithPersonType type, Person person, AuthCredentials authCredentials) {
-        return typeCommand.get(type).execute(person, lastId);
+        return typeCommand.get(type).execute(person, lastId, sqlUserManager.authenticate(authCredentials));
     }
 }
