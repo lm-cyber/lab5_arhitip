@@ -1,4 +1,4 @@
-package com.alan.lab.server.usermanagers;
+package com.alan.lab.server.utility.usermanagers;
 
 import com.alan.lab.common.users.AuthCredentials;
 

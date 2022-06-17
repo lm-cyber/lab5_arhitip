@@ -12,7 +12,7 @@ public class PrintDescendingCommand extends Command {
     }
 
     @Override
-    public Response execute(Object argOrData) {
-        return new Response(collectionManager.descending(), false);
+    public Response execute(Object argOrData, Long userID) {
+        return new Response(collectionManager.descending(), false, true);
     }
 }

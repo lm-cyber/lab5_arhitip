@@ -2,19 +2,20 @@ package com.alan.lab.server.utility.commands;
 
 import com.alan.lab.common.data.Person;
 import com.alan.lab.common.network.Response;
+import com.alan.lab.server.utility.usermanagers.SqlUserManager;
 import com.alan.lab.server.utility.collectionmanagers.CollectionManager;
 
 public class UpdateCommand extends CommandWithPerson {
-    public UpdateCommand(CollectionManager collectionManager) {
-        super(collectionManager);
+    public UpdateCommand(CollectionManager collectionManager, SqlUserManager sqlUserManager) {
+        super(collectionManager, sqlUserManager);
     }
 
     @Override
     public Response execute(Person person, Long id) {
         person.setId(id);
-        if (collectionManager.update(person)) {
-            return new Response("add success", false);
+        if (collectionManager.update(person, id)) {
+            return new Response("add success", false, true);
         }
-        return new Response("contains passport", false);
+        return new Response("contains passport or you not ownerq", false, true);
     }
 }

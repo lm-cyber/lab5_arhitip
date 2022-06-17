@@ -32,8 +32,16 @@ public class CollectionManager {
         passwordIds.clear();
         mainData.clear();
     }
-    public boolean update(Person person) {
-        removeByID(person.getId());
+    public boolean update(Person person, Long userID) {
+
+        if(isHaveId(person.getId())) {
+            return false;
+        }
+        if(!person.getOwnerID().equals(userID)) {
+            return false;
+        }
+
+        removeByID(person.getId(), userID);
         ids.add(person.getId());
         passwordIds.add(person.getPassportID());
         mainData.add(person);
@@ -84,9 +92,12 @@ public class CollectionManager {
 
     }
 
-    public boolean removeByID(Long id) {
+    public boolean removeByID(Long id, Long userID) {
         if (mainData.stream().anyMatch(x -> x.getId().equals(id))) {
             Person person = mainData.stream().filter(x -> x.getId().equals(id)).findAny().get();
+            if(person.getOwnerID() != userID) {
+                return false;
+            }
             passwordIds.remove(person.getPassportID());
             mainData.remove(person);
             removeId(id);
@@ -119,7 +130,13 @@ public class CollectionManager {
         return passwordIds.contains(passportID);
     }
 
-    public Person poll() {
+    public boolean checkOwner(Long personID, Long userID) {
+        return mainData.stream().filter(x -> x.getId().equals(personID)).findAny().get().getOwnerID() == userID;
+    }
+    public Person poll(Long userID) {
+        if(mainData.peek().getOwnerID() != userID) {
+            return null;
+        }
         return mainData.poll();
     }
 
@@ -128,7 +145,6 @@ public class CollectionManager {
         return optionHeight.orElse(0F);
 
     }
-
     public List<Person> descending() {
         return this.mainData.stream().sorted().collect(Collectors.toList());
     }

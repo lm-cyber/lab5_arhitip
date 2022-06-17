@@ -11,8 +11,8 @@ public class AverageOfHeightCommand extends Command {
     }
 
     @Override
-    public Response execute(Object argOrData) {
-        return new Response(collectionManager.averageHeight(), false);
+    public Response execute(Object argOrData, Long userID) {
+        return new Response(collectionManager.averageHeight(), false, true);
 
     }
 }

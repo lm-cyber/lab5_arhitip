@@ -12,7 +12,7 @@ public class ShowCommand extends Command {
     }
 
     @Override
-    public Response execute(Object arg) {
-        return new Response(collectionManager.getMainData(), false);
+    public Response execute(Object arg, Long userID) {
+        return new Response(collectionManager.getMainData(), false, true);
     }
 }

@@ -1,5 +1,6 @@
 package com.alan.lab.server.utility.commands;
 
+import com.alan.lab.common.data.Person;
 import com.alan.lab.common.network.Response;
 import com.alan.lab.server.utility.collectionmanagers.CollectionManager;
 
@@ -11,15 +12,18 @@ public class RemoveHeadCommand extends Command {
     }
 
     @Override
-    public Response execute(Object arg) {
+    public Response execute(Object arg, Long userID) {
         Response response;
         if (collectionManager.isEmpty()) {
-            response = new Response("is empty ,cant remove_head", false);
+            response = new Response("is empty ,cant remove_head", false,true);
         } else {
 
-            response = new Response(collectionManager.poll(), false);
+            Person person = collectionManager.poll(userID);
+            if(person != null) {
+                return new Response(person,false,true);
+            }
         }
-        return response;
+        return new Response("not owner",false,true);
     }
 }
 

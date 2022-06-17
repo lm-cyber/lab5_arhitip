@@ -7,11 +7,21 @@ public class Response implements Serializable {
     private Object message;
     private boolean addsCommand;
 
+    private boolean authBoolean;
     public Response(Object message, boolean addsCommand) {
         this.message = message;
         this.addsCommand = addsCommand;
     }
 
+    public Response(Object message, boolean addsCommand, boolean authBoolean) {
+        this.message = message;
+        this.addsCommand = addsCommand;
+        this.authBoolean = authBoolean;
+    }
+
+    public boolean getAuthBoolean() {
+        return authBoolean;
+    }
     public boolean getAddsCommand() {
         return addsCommand;
     }

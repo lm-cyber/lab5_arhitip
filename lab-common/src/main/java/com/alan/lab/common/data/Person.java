@@ -31,6 +31,8 @@ public class Person implements Comparable<Person>, Serializable {
     private String passportID; //Значение этого поля должно быть уникальным, Длина строки не должна быть больше 49, Длина строки должна быть не меньше 6, Поле не может быть null
     private Color hairColor; //Поле может быть null
     private Location location; //Поле может быть null
+    @NonNull
+    private Long OwnerID;
 
     @Override
     public String toString() {

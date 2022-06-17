@@ -11,9 +11,9 @@ public class InfoCommand extends Command {
     }
 
     @Override
-    public Response execute(Object arg) {
+    public Response execute(Object arg, Long userID) {
         return new Response("type:" + collectionManager.getType().toString()
                 + "\ndate:" + collectionManager.getCreationDate().toString() + "\n"
-                + "count_elem:" + collectionManager.getSize() + "\n", false);
+                + "count_elem:" + collectionManager.getSize() + "\n", false, true);
     }
 }

@@ -12,8 +12,8 @@ public class ClearCommand extends  Command {
     }
 
     @Override
-    public Response execute(Object arg) {
+    public Response execute(Object arg, Long userID) {
         collectionManager.clear();
-        return new Response("clear success", false);
+        return new Response("clear success", false, true);
     }
 }

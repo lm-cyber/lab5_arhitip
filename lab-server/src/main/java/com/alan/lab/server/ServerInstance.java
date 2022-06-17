@@ -6,6 +6,7 @@ import com.alan.lab.common.network.Request;
 import com.alan.lab.common.network.RequestWithPerson;
 import com.alan.lab.common.network.Response;
 import com.alan.lab.common.utility.nonstandardcommand.NonStandardCommand;
+import com.alan.lab.server.utility.usermanagers.SqlUserManager;
 import com.alan.lab.server.utility.NonStandardCommandServer;
 import com.alan.lab.server.utility.collectionmanagers.CollectionManager;
 import com.alan.lab.server.utility.collectionmanagers.FileManager;
@@ -20,6 +21,9 @@ import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.PriorityQueue;
@@ -37,24 +41,31 @@ public class ServerInstance {
     private final HashSet<ObjectSocketWrapper> clients;
     private final Logger logger;
     private final NonStandardCommand nonStandardCommandServer;
+    private SqlUserManager sqlUserManager;
+    private Connection connection;
 
     private final BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 
     public ServerInstance(String fileName) {
         this.collectionManager = new CollectionManager();
         this.fileManager = new FileManager(fileName);
-        this.responseCreator = new ResponseCreator(new HistoryManager(), collectionManager);
         clients = new HashSet<>();
         this.logger = Logger.getLogger("log");
         this.nonStandardCommandServer = new NonStandardCommandServer(collectionManager, logger, in, fileManager);
         File lf = new File("server.log");
         FileHandler fh = null;
         try {
+            this.connection = DriverManager.getConnection("jdbc:postgresql://localhost:5432/personBD", "void", "");
+            this.sqlUserManager = new SqlUserManager(connection,logger);
             fh = new FileHandler(lf.getAbsolutePath(), true);
             logger.addHandler(fh);
         } catch (IOException e) {
             System.out.println(e.getMessage() + "logger not write in file");
+        } catch (SQLException e) {
+            System.out.println("SQL err");
+            System.exit(1);
         }
+        this.responseCreator = new ResponseCreator(new HistoryManager(), collectionManager, sqlUserManager);
     }
 
     private void start() throws FileNotFoundException {
@@ -71,27 +82,15 @@ public class ServerInstance {
         Iterator<ObjectSocketWrapper> it = clients.iterator();
         while (it.hasNext()) {
             ObjectSocketWrapper client = it.next();
-
             try {
                 if (client.checkForMessage()) {
                     Object received = client.getPayload();
                     logger.info("get Payload");
                     if (received instanceof RequestWithPerson) {
-                        logger.info("request with person");
-                        RequestWithPerson requestWithPerson = (RequestWithPerson) received;
-                        Response response = responseCreator.executeCommandWithPerson(requestWithPerson.getType(), requestWithPerson.getPerson());
-                        client.sendMessage(response);
+                        sendResponseWithPerson(received, client);
                     } else if (received instanceof Request) {
-                        Request request = (Request) received;
-                        responseCreator.addHistory(request.getCommandName() + " " + request.getArgs().toString());
-                        logger.info("doing " + request.getCommandName() + " " + request.getArgs().toString());
-                        Response response = responseCreator.executeCommand(request.getCommandName(), request.getArgs());
-                        client.sendMessage(response);
-                        logger.fine("send message");
-
+                        sendResponse(received, client);
                     }
-
-
                     client.clearInBuffer();
                 }
             } catch (IOException e) {
@@ -99,6 +98,22 @@ public class ServerInstance {
                 it.remove();
             }
         }
+    }
+
+    private void sendResponse(Object received, ObjectSocketWrapper client) throws IOException {
+        Request request = (Request) received;
+        responseCreator.addHistory(request.getCommandName() + " " + request.getArgs().toString());
+        logger.info("doing " + request.getCommandName() + " " + request.getArgs().toString());
+        Response response = responseCreator.executeCommand(request.getCommandName(), request.getArgs(), request.getAuthCredentials());
+        client.sendMessage(response);
+        logger.fine("send message");
+    }
+    private void sendResponseWithPerson(Object received,ObjectSocketWrapper client) throws IOException {
+        logger.info("request with person");
+        RequestWithPerson requestWithPerson = (RequestWithPerson) received;
+        Response response = responseCreator.executeCommandWithPerson(requestWithPerson.getType(), requestWithPerson.getPerson(),
+                requestWithPerson.getAuthCredentials());
+        client.sendMessage(response);
     }
 
     public void run(int port) throws IOException {

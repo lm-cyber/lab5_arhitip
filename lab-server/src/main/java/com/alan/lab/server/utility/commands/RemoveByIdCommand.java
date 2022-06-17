@@ -10,13 +10,13 @@ public class RemoveByIdCommand extends Command {
     public RemoveByIdCommand(CollectionManager collectionManager) {
         this.collectionManager = collectionManager;
     }
-
-    public Response execute(Object arg) {
+    @Override
+    public Response execute(Object arg, Long userID) {
         Response response;
-        if (collectionManager.removeByID((Long) arg)) {
-            response = new Response("delete success", false);
+        if (collectionManager.removeByID((Long) arg,userID)) {
+            response = new Response("delete success", false, true);
         } else {
-            response = new Response("havent id", false);
+            response = new Response("havent id", false, true);
         }
         return response;
     }

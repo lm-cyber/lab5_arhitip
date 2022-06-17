@@ -4,6 +4,7 @@ import com.alan.lab.common.data.Person;
 import com.alan.lab.common.network.Request;
 import com.alan.lab.common.network.RequestWithPerson;
 import com.alan.lab.common.network.RequestWithPersonType;
+import com.alan.lab.common.users.AuthCredentials;
 import com.alan.lab.common.utility.OutputManager;
 import com.alan.lab.common.utility.ParseToNameAndArg;
 import com.alan.lab.common.utility.UserInputManager;
@@ -22,26 +23,30 @@ public class RequestCreator {
         this.outputManager = outputManager;
     }
 
-    public void requestCreate(String input, boolean addCommand) throws IOException {
+    public void requestCreate(String input, boolean[] addCommandAndAuth, AuthCredentials authCredentials) throws IOException {
         ParseToNameAndArg parseToNameAndArg = new ParseToNameAndArg(input);
-        if (addCommand) {
-            sendRequestWithPerson(type);
+        if (addCommandAndAuth[0]) {
+            sendRequestWithPerson(type, authCredentials);
         } else {
-            sendRequest(parseToNameAndArg);
+            sendRequest(parseToNameAndArg, authCredentials);
             type = RequestWithPersonType.getEnum(parseToNameAndArg.getName().toUpperCase());
         }
 
     }
+    public void Auth(AuthCredentials authCredentials) throws IOException {
+        Request request = new Request(authCredentials.isNewUser()?"reg":"log",authCredentials,authCredentials);
+        remote.sendMessage(request);
+    }
 
-    private void sendRequestWithPerson(RequestWithPersonType rType) throws IOException {
+    private void sendRequestWithPerson(RequestWithPersonType rType, AuthCredentials authCredentials) throws IOException {
         RequestWithPerson requestWithPerson;
         Person person = AddElem.add(userInputManager, outputManager);
-        requestWithPerson = new RequestWithPerson(person, rType);
+        requestWithPerson = new RequestWithPerson(person, rType, authCredentials);
         remote.sendMessage(requestWithPerson);
     }
 
-    private void sendRequest(ParseToNameAndArg parseToNameAndArg) throws IOException {
-        Request request = new Request(parseToNameAndArg.getName(), parseToNameAndArg.getArg());
+    private void sendRequest(ParseToNameAndArg parseToNameAndArg, AuthCredentials authCredentials) throws IOException {
+        Request request = new Request(parseToNameAndArg.getName(), parseToNameAndArg.getArg(),authCredentials);
         remote.sendMessage(request);
     }
 

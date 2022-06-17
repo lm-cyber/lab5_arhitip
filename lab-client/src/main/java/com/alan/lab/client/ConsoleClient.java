@@ -1,13 +1,9 @@
 package com.alan.lab.client;
 
-import com.alan.lab.common.data.Person;
-import com.alan.lab.common.network.Request;
-import com.alan.lab.common.network.RequestWithPerson;
 import com.alan.lab.common.network.RequestWithPersonType;
 import com.alan.lab.common.network.Response;
 import com.alan.lab.common.users.AuthCredentials;
 import com.alan.lab.common.utility.OutputManager;
-import com.alan.lab.common.utility.ParseToNameAndArg;
 import com.alan.lab.common.utility.UserInputManager;
 import com.alan.lab.common.utility.nonstandardcommand.NonStandardCommand;
 
@@ -56,9 +52,9 @@ public class ConsoleClient {
 
     }
 
-    private boolean responseHandler() throws IOException {
+    private boolean[] responseHandler() throws IOException {
 
-        boolean addCommand = false;
+        boolean[] addCommandAndAuth = new boolean[2];
         Response response = waitForResponse();
         if (response != null) {
             if (response.getMessage() instanceof Collection) {
@@ -67,45 +63,37 @@ public class ConsoleClient {
                 outputManager.println(response.getMessage().toString());
             }
             logger.fine("success got response");
-            addCommand = response.getAddsCommand();
-            if (addCommand) {
+            addCommandAndAuth[0] = response.getAddsCommand();
+            addCommandAndAuth[1] = response.getAuthBoolean();
+            if (addCommandAndAuth[0]) {
                 logger.info("response with adding");
             }
         } else {
             logger.severe("request failed");
             outputManager.println("Request failed");
         }
-        return addCommand;
-    }
-    private void sendRequestWithPerson(RequestWithPersonType type) throws IOException {
-        RequestWithPerson requestWithPerson;
-        Person person = AddElem.add(userInputManager, outputManager);
-        requestWithPerson = new RequestWithPerson(person, type);
-        logger.info("creating new person");
-        remote.sendMessage(requestWithPerson);
-        logger.info("send request with person");
-    }
-    private void sendRequest(ParseToNameAndArg parseToNameAndArg) throws IOException {
-        Request request = new Request(parseToNameAndArg.getName(), parseToNameAndArg.getArg());
-                        remote.sendMessage(request);
-                        logger.info("send request");
+        return addCommandAndAuth;
     }
 
     private void inputCycle() {
         RequestWithPersonType type = null;
-        boolean addCommand = false;
+        boolean[] addCommandAndAuth = new boolean[2];
+        AuthCredentials authCredentials = null;
         String input = "";
         while (input != null) {
-            if (!addCommand) {
-                input = userInputManager.nextLine();
-            }
             try {
+                if(!addCommandAndAuth[1]) {
+                    authCredentials = connectAuth();
+                }
+                else if (!addCommandAndAuth[0]) {
+                    input = userInputManager.nextLine();
+                }
                 if (nonStandardCommandClient.execute(input)) {
                     continue;
                 }
                 try {
-                    requestCreator.requestCreate(input, addCommand);
-                    addCommand = responseHandler();
+                    requestCreator.requestCreate(input, addCommandAndAuth, authCredentials);
+                    addCommandAndAuth = responseHandler();
                 } catch (NumberFormatException e) {
                     logger.warning("bad args");
                     outputManager.println("problem with args");
@@ -136,12 +124,46 @@ public class ConsoleClient {
         }
     }
 
-    public AuthCredentials changeUser() {
+    private AuthCredentials connectAuth() throws IOException {
+        boolean auth = false;
+        AuthCredentials authCredentials = null;
+        while (!auth) {
+            try {
+                authCredentials = choseAuth();
+                requestCreator.Auth(authCredentials);
+                auth = responseHandler()[1];
+            } catch (NumberFormatException e) {
+                outputManager.println("problem with auth");
+            }
+            remote.clearInBuffer();
+        }
+        return authCredentials;
+    }
+    private AuthCredentials changeUser() {
         outputManager.print("login :");
         String login = userInputManager.nextLine();
         outputManager.print("password :");
         String password = userInputManager.nextLine();
         return new AuthCredentials(login, password);
+    }
+
+
+    private AuthCredentials choseAuth() {
+        boolean shouldContinue = true;
+        String input;
+        while (shouldContinue) {
+            outputManager.println("reg or log");
+            input = userInputManager.nextLine();
+            if("reg".equals(input)) {
+                AuthCredentials credentials =  changeUser();
+                credentials.setNewUser(true);
+                return credentials;
+            }
+            if("log".equals(input)) {
+                return changeUser();
+            }
+        }
+        return null;
     }
 
 

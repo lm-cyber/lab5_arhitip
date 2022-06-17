@@ -25,7 +25,7 @@ public class HelpCommad extends Command {
     }
 
     @Override
-    public Response execute(Object arg) {
-        return new Response(response, false);
+    public Response execute(Object arg, Long userID) {
+        return new Response(response, false, true);
     }
 }

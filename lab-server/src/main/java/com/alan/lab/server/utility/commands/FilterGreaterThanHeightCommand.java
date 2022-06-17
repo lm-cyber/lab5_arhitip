@@ -11,7 +11,7 @@ public class FilterGreaterThanHeightCommand extends Command {
     }
 
     @Override
-    public Response execute(Object argOrData) {
-        return new Response(collectionManager.filterGreaterThanHeight((Float) argOrData), false);
+    public Response execute(Object argOrData, Long userID) {
+        return new Response(collectionManager.filterGreaterThanHeight((Float) argOrData), false, true);
     }
 }
