@@ -49,7 +49,7 @@ public class Person implements Comparable<Person>, Serializable {
     }
 
     public Float getHeight() {
-        return height != null ? height : 0F;
+        return height != null ? height : -1F;
     }
 
     @Override
