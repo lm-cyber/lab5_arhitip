@@ -11,6 +11,7 @@ import com.alan.lab.server.utility.JsonParser;
 import com.alan.lab.server.utility.NonStandardCommandServer;
 import com.alan.lab.server.utility.collectionmanagers.CollectionManager;
 import com.alan.lab.server.utility.collectionmanagers.FileManager;
+import com.alan.lab.server.utility.collectionmanagers.SqlCollectionManager;
 import com.alan.lab.server.utility.usermanagers.SqlUserManager;
 
 import java.io.File;
@@ -41,6 +42,7 @@ public class ServerInstance {
     private final NonStandardCommand nonStandardCommandServer;
     private SqlUserManager sqlUserManager;
     private Connection connection;
+    private SqlCollectionManager sqlCollectionManager;
 
 
     public ServerInstance(String fileName) {
@@ -53,6 +55,7 @@ public class ServerInstance {
         FileHandler fh = null;
         try {
             this.connection = DriverManager.getConnection("jdbc:postgresql://localhost:5432/personBD", "void", "");
+            this.sqlCollectionManager = new SqlCollectionManager(connection, logger);
             this.sqlUserManager = new SqlUserManager(connection,logger);
             fh = new FileHandler(lf.getAbsolutePath(), true);
             logger.addHandler(fh);
@@ -62,7 +65,7 @@ public class ServerInstance {
             System.out.println("SQL err");
             System.exit(1);
         }
-        this.responseCreator = new ResponseCreator(new HistoryManager(), collectionManager, sqlUserManager);
+        this.responseCreator = new ResponseCreator(new HistoryManager(), collectionManager, sqlUserManager, sqlCollectionManager);
     }
 
     private void start() throws FileNotFoundException {

@@ -4,6 +4,7 @@ import com.alan.lab.common.data.Person;
 import com.alan.lab.common.network.RequestWithPersonType;
 import com.alan.lab.common.network.Response;
 import com.alan.lab.common.users.AuthCredentials;
+import com.alan.lab.server.utility.collectionmanagers.SqlCollectionManager;
 import com.alan.lab.server.utility.usermanagers.SqlUserManager;
 import com.alan.lab.server.utility.collectionmanagers.CollectionManager;
 import com.alan.lab.server.utility.HistoryManager;
@@ -18,13 +19,15 @@ public class ResponseCreator {
     private final HashMap<RequestWithPersonType, CommandWithPerson> typeCommand;
     private Long lastId;
     private final SqlUserManager sqlUserManager;
+    private final SqlCollectionManager sqlCollectionManager;
 
-    public ResponseCreator(HistoryManager historyManager, CollectionManager collectionManager, SqlUserManager sqlUserManager) {
+    public ResponseCreator(HistoryManager historyManager, CollectionManager collectionManager, SqlUserManager sqlUserManager, SqlCollectionManager sqlCollectionManager) {
         this.historyManager = historyManager;
         this.collectionManager = collectionManager;
         this.commands = new HashMap<>();
         this.typeCommand = new HashMap<>();
         this.sqlUserManager = sqlUserManager;
+        this.sqlCollectionManager = sqlCollectionManager;
 
         typeCommand.put(RequestWithPersonType.ADD, new AddCommand(collectionManager, sqlUserManager));
         typeCommand.put(RequestWithPersonType.UPDATE, new UpdateCommand(collectionManager, sqlUserManager));
