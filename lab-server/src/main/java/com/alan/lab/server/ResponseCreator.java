@@ -29,10 +29,10 @@ public class ResponseCreator {
         this.sqlUserManager = sqlUserManager;
         this.sqlCollectionManager = sqlCollectionManager;
 
-        typeCommand.put(RequestWithPersonType.ADD, new AddCommand(collectionManager, sqlUserManager));
-        typeCommand.put(RequestWithPersonType.UPDATE, new UpdateCommand(collectionManager, sqlUserManager));
-        typeCommand.put(RequestWithPersonType.ADD_IF_MIN, new AddIfMinCommand(collectionManager, sqlUserManager));
-        commands.put("clear", new ClearCommand(collectionManager));
+        typeCommand.put(RequestWithPersonType.ADD, new AddCommand(collectionManager, sqlUserManager, sqlCollectionManager));
+        typeCommand.put(RequestWithPersonType.UPDATE, new UpdateCommand(collectionManager, sqlUserManager, sqlCollectionManager));
+        typeCommand.put(RequestWithPersonType.ADD_IF_MIN, new AddIfMinCommand(collectionManager, sqlUserManager, sqlCollectionManager));
+        commands.put("clear", new ClearCommand(collectionManager, sqlCollectionManager));
         commands.put("help", new HelpCommad());
         commands.put("history", new HistoryCommand(historyManager));
         commands.put("show", new ShowCommand(collectionManager));
@@ -40,8 +40,8 @@ public class ResponseCreator {
         commands.put("average_of_height", new AverageOfHeightCommand(collectionManager));
         commands.put("filter_greater_than_height", new FilterGreaterThanHeightCommand(collectionManager));
         commands.put("print_descending", new PrintDescendingCommand(collectionManager));
-        commands.put("remove_by_id", new RemoveByIdCommand(collectionManager));
-        commands.put("remove_head", new RemoveHeadCommand(collectionManager));
+        commands.put("remove_by_id", new RemoveByIdCommand(collectionManager, sqlCollectionManager));
+        commands.put("remove_head", new RemoveHeadCommand(collectionManager, sqlCollectionManager));
         commands.put("add", new AddCom());
         commands.put("update", new UpdateCom(collectionManager));
         commands.put("add_if_min", new AddCom());

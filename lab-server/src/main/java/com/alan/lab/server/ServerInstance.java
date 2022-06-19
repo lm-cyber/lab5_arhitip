@@ -7,7 +7,6 @@ import com.alan.lab.common.network.RequestWithPerson;
 import com.alan.lab.common.network.Response;
 import com.alan.lab.common.utility.nonstandardcommand.NonStandardCommand;
 import com.alan.lab.server.utility.HistoryManager;
-import com.alan.lab.server.utility.JsonParser;
 import com.alan.lab.server.utility.NonStandardCommandServer;
 import com.alan.lab.server.utility.collectionmanagers.CollectionManager;
 import com.alan.lab.server.utility.collectionmanagers.FileManager;
@@ -25,7 +24,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.PriorityQueue;
+import java.util.concurrent.PriorityBlockingQueue;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 
@@ -69,10 +68,12 @@ public class ServerInstance {
     }
 
     private void start() throws FileNotFoundException {
-        StringBuilder stringData = null;
-        PriorityQueue<Person> people;
-        stringData = fileManager.read();
-        people = new PriorityQueue<>(JsonParser.toData(String.valueOf(stringData)));
+        try {
+            this.sqlCollectionManager.initTable();
+        } catch (SQLException e) {
+            logger.severe("init table pisec" + e);
+        }
+        PriorityBlockingQueue<Person> people = new PriorityBlockingQueue<>(sqlCollectionManager.getCollection());
 
         collectionManager.initialiseData(people);
     }

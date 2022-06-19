@@ -5,16 +5,17 @@ import com.alan.lab.common.exceptions.NotMinException;
 
 import java.time.LocalDate;
 import java.util.*;
+import java.util.concurrent.PriorityBlockingQueue;
 import java.util.stream.Collectors;
 
 public class CollectionManager {
-    private PriorityQueue<Person> mainData = new PriorityQueue<>();
+    private PriorityBlockingQueue<Person> mainData;
     private final LocalDate creationDate = LocalDate.now();
     private HashSet<Long> ids = new HashSet<>();
     private HashSet<String> passwordIds = new HashSet<>();
     private Long iterId = 0L;
 
-    public void initialiseData(PriorityQueue<Person> people) {
+    public void initialiseData(PriorityBlockingQueue<Person> people) {
         this.mainData = people;
         for (Person person : mainData) {
             ids.add(person.getId());
@@ -50,7 +51,7 @@ public class CollectionManager {
         return mainData.getClass();
     }
 
-    public PriorityQueue<Person> getMainData() {
+    public PriorityBlockingQueue<Person> getMainData() {
         return mainData;
     }
 

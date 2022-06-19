@@ -7,9 +7,7 @@ import com.alan.lab.common.data.Person;
 
 import java.sql.*;
 import java.util.List;
-import java.util.PriorityQueue;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.PriorityBlockingQueue;
 import java.util.function.Predicate;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -33,8 +31,7 @@ public class SqlCollectionManager {
             + "      FOREIGN KEY(owner_id) REFERENCES users(id) ON DELETE CASCADE)";
     private final Logger logger;
     private final Connection conn;
-    private final PriorityQueue<Person> collection = new PriorityQueue<>();
-    private final Lock lock = new ReentrantLock();
+    private final PriorityBlockingQueue<Person> collection = new PriorityBlockingQueue<>();
 
     public SqlCollectionManager(Connection conn, Logger logger) {
         this.conn = conn;
@@ -91,62 +88,61 @@ public class SqlCollectionManager {
     private void preparePersonStatement(PreparedStatement s, Person person, int paramOffset) throws SQLException {
         int i = 0;
         s.setString(paramOffset + ++i, person.getName());
-        s.setFloat(paramOffset + ++i,person.getCoordinates().getX());
-        s.setFloat(paramOffset + ++i,person.getCoordinates().getY());
+        s.setFloat(paramOffset + ++i, person.getCoordinates().getX());
+        s.setFloat(paramOffset + ++i, person.getCoordinates().getY());
         s.setTimestamp(paramOffset + ++i, Timestamp.valueOf(person.getCreationDate()));
-        if(person.getHeight() != -1F) {
+        if (person.getHeight() != -1F) {
             s.setFloat(paramOffset + ++i, person.getHeight());
+        } else {
+            s.setNull(paramOffset + ++i, Types.FLOAT);
         }
+
         s.setTimestamp(paramOffset + ++i, Timestamp.valueOf(person.getBirthday()));
         s.setString(paramOffset + ++i, person.getPassportID());
-        if(person.getHairColor() != null) {
+        if (person.getHairColor() != null) {
             s.setString(paramOffset + ++i, person.getHairColor().toString());
+        } else {
+            s.setNull(paramOffset + ++i, Types.VARCHAR);
         }
-        if(person.getLocation() != null) {
-            s.setDouble(paramOffset + ++i,person.getLocation().getX());
-            s.setInt(paramOffset + ++i,person.getLocation().getY());
-            s.setLong(paramOffset + ++i,person.getLocation().getZ());
+        if (person.getLocation() != null) {
+            s.setDouble(paramOffset + ++i, person.getLocation().getX());
+            s.setInt(paramOffset + ++i, person.getLocation().getY());
+            s.setLong(paramOffset + ++i, person.getLocation().getZ());
+        } else {
+            s.setNull(paramOffset + ++i, Types.DOUBLE);
+            s.setNull(paramOffset + ++i, Types.INTEGER);
+            s.setNull(paramOffset + ++i, Types.BIGINT);
         }
-        s.setLong(paramOffset + ++i,person.getOwnerID());
+        s.setLong(paramOffset + ++i, person.getOwnerID());
     }
 
-    public PriorityQueue<Person> getCollection() {
-        try {
-            lock.lock();
-            return new PriorityQueue<Person>(collection);
-        } finally {
-            lock.unlock();
-        }
+    public PriorityBlockingQueue<Person> getCollection() {
+            return collection;
     }
 
     public Person getItemById(long id) {
         try {
-            lock.lock();
             return collection.stream().filter(x -> x.getId() == id).findFirst().orElse(null);
         } finally {
-            lock.unlock();
         }
     }
 
-    public long add(Person route) {
+    public long add(Person person) {
         String query = "INSERT INTO person VALUES ("
                      + "    default,?,?,?,?,?,?,?,?,?,?,?,?) RETURNING id";
 
         try (PreparedStatement s = conn.prepareStatement(query)) {
-            lock.lock();
-            preparePersonStatement(s, route, 0);
+            preparePersonStatement(s, person, 0);
             try (ResultSet res = s.executeQuery()) {
                 res.next();
                 Long id = res.getLong("id");
-                route.setId(id);
-                collection.add(route);
+                person.setId(id);
+                collection.add(person);
                 return id;
             }
         } catch (SQLException e) {
             logger.severe("Failed to insert element into DB" + e);
             return 0;
-        } finally {
-            lock.unlock();
         }
     }
 
@@ -167,7 +163,6 @@ public class SqlCollectionManager {
                      + "WHERE id=?";
 
         try (PreparedStatement s = conn.prepareStatement(query)) {
-            lock.lock();
             preparePersonStatement(s, person, 0);
             s.setLong(idOffset, person.getId());
             int count = s.executeUpdate();
@@ -181,8 +176,6 @@ public class SqlCollectionManager {
         } catch (SQLException e) {
             logger.severe("Failed to update route" + e);
             return false;
-        } finally {
-            lock.unlock();
         }
     }
 
@@ -192,31 +185,22 @@ public class SqlCollectionManager {
         String query = "DELETE FROM person WHERE id=?";
 
         try (PreparedStatement s = conn.prepareStatement(query)) {
-            lock.lock();
             s.setLong(1, id);
             s.executeUpdate();
             collection.removeIf(x -> x.getId() == id);
         } catch (SQLException e) {
             logger.severe("Failed to delete row" + e);
-        } finally {
-            lock.unlock();
         }
     }
 
     public int removeIf(Predicate<? super Person> predicate) {
-        try {
-            lock.lock();
             List<Long> ids = collection.stream().filter(predicate).map(x -> x.getId()).collect(Collectors.toList());
             ids.forEach(this::remove);
             return ids.size();
-        } finally {
-            lock.unlock();
-        }
     }
 
     public void clear() {
         try (Statement s = conn.createStatement()) {
-            lock.lock();
             boolean prev = conn.getAutoCommit();
             conn.setAutoCommit(false);
             s.execute("DROP TABLE person");
@@ -231,8 +215,6 @@ public class SqlCollectionManager {
             } catch (SQLException e_) {
                 logger.severe("Failed to rollback" + e);
             }
-        } finally {
-            lock.unlock();
         }
     }
 }

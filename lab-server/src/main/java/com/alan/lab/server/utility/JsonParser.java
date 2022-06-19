@@ -10,6 +10,7 @@ import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.time.LocalDateTime;
 import java.util.PriorityQueue;
+import java.util.concurrent.PriorityBlockingQueue;
 
 public final class JsonParser {
     private JsonParser() {
@@ -23,7 +24,7 @@ public final class JsonParser {
         return gson.fromJson(json.trim(), typeToken);
     }
 
-    public static String toJson(PriorityQueue<Person> people) {
+    public static String toJson(PriorityBlockingQueue<Person> people) {
         Gson gson = new GsonBuilder()
                 .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeSerializer())
                 .setPrettyPrinting().create();
