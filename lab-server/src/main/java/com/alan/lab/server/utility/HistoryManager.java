@@ -1,12 +1,11 @@
 package com.alan.lab.server.utility;
 
-import java.util.Queue;
 import java.util.StringJoiner;
-import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class HistoryManager {
     private final int capacity = 13;
-    private final Queue<String> history = new ArrayBlockingQueue<>(capacity);
+    private final ConcurrentLinkedQueue<String> history = new ConcurrentLinkedQueue<>();
 
     public void addNote(String note) {
         if (history.size() == capacity) {

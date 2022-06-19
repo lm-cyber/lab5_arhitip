@@ -10,7 +10,7 @@ import java.net.SocketTimeoutException;
 import java.nio.ByteBuffer;
 
 public class ObjectSocketWrapper {
-     private final Socket socket;
+    private final Socket socket;
     private byte[] sizeInBuffer;
     private byte[] payloadBuffer;
     private int sizeInBufferPos = 0;
@@ -22,10 +22,15 @@ public class ObjectSocketWrapper {
         this.payloadBuffer = null;
     }
 
-    public void sendMessage(Object object) throws IOException {
-        byte[] msg = ObjectEncoder.encodeObject(object).array();
+    public boolean sendMessage(Object object) {
+        try {
+            byte[] msg = ObjectEncoder.encodeObject(object).array();
 
-        socket.getOutputStream().write(msg);
+            socket.getOutputStream().write(msg);
+            return true;
+        } catch (IOException e) {
+            return false;
+        }
     }
 
     public boolean checkForMessage() throws IOException {
@@ -35,6 +40,11 @@ public class ObjectSocketWrapper {
             }
 
             int readBytes = socket.getInputStream().read(sizeInBuffer, sizeInBufferPos, Integer.BYTES - sizeInBufferPos);
+
+            if (readBytes == -1) {
+                throw new IOException("Failed to read bytes from the socket");
+            }
+
             sizeInBufferPos += readBytes;
             if (sizeInBufferPos < Integer.BYTES) {
                 return false;
@@ -48,7 +58,7 @@ public class ObjectSocketWrapper {
             payloadBufferPos += readBytes;
 
             return payloadBufferPos >= payloadBuffer.length;
-        } catch (SocketTimeoutException | IndexOutOfBoundsException e) {
+        } catch (SocketTimeoutException e) {
             return false;
         }
     }
@@ -74,4 +84,5 @@ public class ObjectSocketWrapper {
     public Socket getSocket() {
         return socket;
     }
+
 }
