@@ -11,7 +11,7 @@ public class RemoveHeadCommand extends Command {
 
     public RemoveHeadCommand(CollectionManager collectionManager, SqlCollectionManager sqlCollectionManager) {
         this.collectionManager = collectionManager;
-        this.sqlCollectionManager =sqlCollectionManager;
+        this.sqlCollectionManager = sqlCollectionManager;
 
     }
 
@@ -19,16 +19,16 @@ public class RemoveHeadCommand extends Command {
     public Response execute(Object arg, Long userID) {
         Response response;
         if (collectionManager.isEmpty()) {
-            response = new Response("is empty ,cant remove_head", false,true);
+            response = new Response("is empty ,cant remove_head", false, true);
         } else {
 
             Person person = collectionManager.poll(userID);
-            if(person != null) {
+            if (person != null) {
                 sqlCollectionManager.remove(person.getId());
-                return new Response(person,false,true);
+                return new Response(person, false, true);
             }
         }
-        return new Response("not owner",false,true);
+        return new Response("not owner", false, true);
     }
 }
 

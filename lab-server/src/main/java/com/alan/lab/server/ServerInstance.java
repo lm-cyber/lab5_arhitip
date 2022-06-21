@@ -22,7 +22,14 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Iterator;
-import java.util.concurrent.*;
+import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.ForkJoinTask;
+import java.util.concurrent.Future;
+import java.util.concurrent.PriorityBlockingQueue;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 
@@ -80,37 +87,21 @@ public class ServerInstance {
     }
 
 
-    public void handleRequests1() throws IOException {
-        Iterator<ObjectSocketWrapper> it = clients.iterator();
-        while (it.hasNext()) {
-            ObjectSocketWrapper client = it.next();
-            try {
-                if (client.checkForMessage()) {
-                    Object received = client.getPayload();
-                    logger.info("get Payload");
-
-                    if (received instanceof RequestWithPerson) {
-                        sendResponseWithPerson(received, client);
-                    } else if (received instanceof Request) {
-                        sendResponse(received, client);
-                    }
-                    client.clearInBuffer();
-                }
-            } catch (IOException e) {
-                client.getSocket().close();
-                it.remove();
-            }
-        }
-    }
-
     public void handleRequests() {
         Iterator<ObjectSocketWrapper> it = clients.iterator();
         while (it.hasNext()) {
-            responseReceiverPool.submit(() -> {
+            Future<?> task = responseReceiverPool.submit(() -> {
                 ClientCashedPool client = new ClientCashedPool(it.next());
                 client.start();
                 client.handleRequests();
             });
+            try {
+                task.get();
+            } catch (InterruptedException e) {
+                logger.severe(e.getMessage());
+            } catch (ExecutionException e) {
+                logger.severe(e.getCause().getMessage());
+            }
         }
     }
 
@@ -198,7 +189,6 @@ public class ServerInstance {
                 } catch (IOException e) {
                     stop();
                     logger.severe("problem with getting");
-                    e.printStackTrace();
                 }
             }
         }
@@ -207,36 +197,59 @@ public class ServerInstance {
             Request request = (Request) received;
             responseCreator.addHistory(request.getCommandName() + " " + request.getArgs().toString());
             logger.info("doing " + request.getCommandName() + " " + request.getArgs().toString());
-            responseHandlerPool.submit(() -> {
+            ForkJoinTask<?> task = responseHandlerPool.submit(() -> {
                 Response response = responseCreator.executeCommand(request.getCommandName(), request.getArgs(), request.getAuthCredentials());
-            responseSenderPool1.submit(() -> {
-                if(client.sendMessage(response)) {
-                    logger.fine("send message");
-                }
-                else {
-                    logger.severe("problem with sending");
-                    stop();
+                ForkJoinTask<?> taskSender = responseSenderPool1.submit(() -> {
+                    sendTaskResponse(client, response);
+                });
+                try {
+                    taskSender.get();
+                } catch (InterruptedException e) {
+                    logger.severe(e.getMessage());
+                } catch (ExecutionException e) {
+                    logger.severe(e.getCause().getMessage());
                 }
             });
-        });
+            try {
+                task.get();
+            } catch (InterruptedException e) {
+                logger.severe(e.getMessage());
+            } catch (ExecutionException e) {
+                logger.severe(e.getCause().getMessage());
+            }
         }
 
         private void sendResponseWithPerson(Object received, ObjectSocketWrapper client) {
             logger.info("request with person");
             RequestWithPerson requestWithPerson = (RequestWithPerson) received;
-            responseHandlerPool.submit(() -> {
-                        Response response = responseCreator.executeCommandWithPerson(requestWithPerson.getType(), requestWithPerson.getPerson(),
-                                requestWithPerson.getAuthCredentials());
-                responseSenderPool1.submit(() -> {
-                    if( client.sendMessage(response)) {
-                        logger.fine("send message");
-                    }
-                    else {
-                        logger.severe("problem with sending");
-                        stop();
-                    }
+            ForkJoinTask<?> task = responseHandlerPool.submit(() -> {
+                Response response = responseCreator.executeCommandWithPerson(requestWithPerson.getType(), requestWithPerson.getPerson(), requestWithPerson.getAuthCredentials());
+                ForkJoinTask<?> taskSender = responseSenderPool1.submit(() -> {
+                    sendTaskResponse(client, response);
                 });
+                try {
+                    taskSender.get();
+                } catch (InterruptedException e) {
+                    logger.severe(e.getMessage());
+                } catch (ExecutionException e) {
+                    logger.severe(e.getCause().getMessage());
+                }
             });
+            try {
+                task.get();
+            } catch (InterruptedException e) {
+                logger.severe(e.getMessage());
+            } catch (ExecutionException e) {
+                logger.severe(e.getCause().getMessage());
+            }
+        }
+        private void sendTaskResponse(ObjectSocketWrapper client, Response response) {
+            if (client.sendMessage(response)) {
+                logger.fine("send message");
+            } else {
+                logger.severe("problem with sending");
+                stop();
+            }
         }
 
     }

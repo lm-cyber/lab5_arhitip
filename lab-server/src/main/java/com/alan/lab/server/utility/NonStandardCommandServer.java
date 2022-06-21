@@ -35,6 +35,7 @@ public class NonStandardCommandServer implements NonStandardCommand {
                 case "exit":
                     System.out.println("Shutting down");
                     logger.fine("exit");
+                    System.exit(0);
                     return true;
                 default:
                     System.out.println("Unknown command. Available commands are: save, exit");

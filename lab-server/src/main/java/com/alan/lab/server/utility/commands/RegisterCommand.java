@@ -14,9 +14,9 @@ public class RegisterCommand extends Command {
 
     @Override
     public Response execute(Object argOrData, Long userID) {
-        if(sqlUserManager.register((AuthCredentials) argOrData) != null) {
-            return new Response("success reg",false,true);
+        if (sqlUserManager.register((AuthCredentials) argOrData) != null) {
+            return new Response("success reg", false, true);
         }
-        return new Response("not reg",false,false);
+        return new Response("not reg", false, false);
     }
 }

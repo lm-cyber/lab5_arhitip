@@ -5,7 +5,13 @@ import com.alan.lab.common.data.Coordinates;
 import com.alan.lab.common.data.Location;
 import com.alan.lab.common.data.Person;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Timestamp;
+import java.sql.Types;
 import java.util.List;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.function.Predicate;
@@ -64,21 +70,21 @@ public class SqlCollectionManager {
         Person.PersonBuilder personBuilder = Person.builder();
         personBuilder.id(res.getLong("id"));
         personBuilder.name(res.getString("name"));
-        personBuilder.coordinates(new Coordinates(res.getFloat("coordinates_x"),res.getFloat("coordinates_y")));
+        personBuilder.coordinates(new Coordinates(res.getFloat("coordinates_x"), res.getFloat("coordinates_y")));
         personBuilder.creationDate(res.getTimestamp("creation_date").toLocalDateTime());
         Float height = res.getFloat("height");
-        if(height != null) {
+        if (height != null) {
             personBuilder.height(height);
         }
         personBuilder.birthday(res.getTimestamp("birthday").toLocalDateTime());
         personBuilder.passportID(res.getString("passport_id"));
         String color = res.getString("hair_color");
-        if(color != null) {
+        if (color != null) {
             personBuilder.hairColor(Color.valueOf(color.toUpperCase()));
         }
         Double locationX = res.getDouble("location_x");
-        if(locationX != null) {
-            personBuilder.location(new Location(locationX,res.getInt("location_y"),res.getLong("location_z")));
+        if (locationX != null) {
+            personBuilder.location(new Location(locationX, res.getInt("location_y"), res.getLong("location_z")));
         }
         personBuilder.ownerID(res.getLong("owner_id"));
 
@@ -117,19 +123,16 @@ public class SqlCollectionManager {
     }
 
     public PriorityBlockingQueue<Person> getCollection() {
-            return collection;
+        return collection;
     }
 
     public Person getItemById(long id) {
-        try {
-            return collection.stream().filter(x -> x.getId() == id).findFirst().orElse(null);
-        } finally {
-        }
+        return collection.stream().filter(x -> x.getId() == id).findFirst().orElse(null);
     }
 
     public long add(Person person) {
         String query = "INSERT INTO person VALUES ("
-                     + "    default,?,?,?,?,?,?,?,?,?,?,?,?) RETURNING id";
+                + "    default,?,?,?,?,?,?,?,?,?,?,?,?) RETURNING id";
 
         try (PreparedStatement s = conn.prepareStatement(query)) {
             preparePersonStatement(s, person, 0);
@@ -148,19 +151,19 @@ public class SqlCollectionManager {
 
     public boolean update(Person person) {
         final int idOffset = 12;
-        String query = "UPDATE routes SET "
-                     + "name=?, "
-                     + "creation_date=?, "
-                     + "from_name=?, "
-                     + "from_coordinates_x=?, "
-                     + "from_coordinates_y=?, "
-                     + "from_coordinates_z=?, "
-                     + "to_name=?, "
-                     + "to_coordinates_x=?, "
-                     + "to_coordinates_y=?, "
-                     + "to_coordinates_z=?, "
-                     + "distance=? "
-                     + "WHERE id=?";
+        String query = "UPDATE person SET "
+                + "name=?, "
+                + "coordinates_x=?, "
+                + "coordinates_y=?, "
+                + "creation_date=?, "
+                + "height=?, "
+                + "birthday=?, "
+                + "passport_id=?, "
+                + "hair_color=?, "
+                + "location_x=?, "
+                + "location_y=?, "
+                + "location_z=? "
+                + "WHERE id=?";
 
         try (PreparedStatement s = conn.prepareStatement(query)) {
             preparePersonStatement(s, person, 0);
@@ -174,11 +177,10 @@ public class SqlCollectionManager {
                 return false;
             }
         } catch (SQLException e) {
-            logger.severe("Failed to update route" + e);
+            logger.severe("Failed to update person " + e);
             return false;
         }
     }
-
 
 
     public void remove(long id) {
@@ -194,9 +196,9 @@ public class SqlCollectionManager {
     }
 
     public int removeIf(Predicate<? super Person> predicate) {
-            List<Long> ids = collection.stream().filter(predicate).map(x -> x.getId()).collect(Collectors.toList());
-            ids.forEach(this::remove);
-            return ids.size();
+        List<Long> ids = collection.stream().filter(predicate).map(x -> x.getId()).collect(Collectors.toList());
+        ids.forEach(this::remove);
+        return ids.size();
     }
 
     public void clear() {

@@ -33,8 +33,9 @@ public class RequestCreator {
         }
 
     }
-    public void Auth(AuthCredentials authCredentials) throws IOException {
-        Request request = new Request(authCredentials.isNewUser()?"reg":"log",authCredentials,authCredentials);
+
+    public void auth(AuthCredentials authCredentials) throws IOException {
+        Request request = new Request(authCredentials.isNewUser() ? "reg" : "log", authCredentials, authCredentials);
         remote.sendMessage(request);
     }
 
@@ -46,7 +47,7 @@ public class RequestCreator {
     }
 
     private void sendRequest(ParseToNameAndArg parseToNameAndArg, AuthCredentials authCredentials) throws IOException {
-        Request request = new Request(parseToNameAndArg.getName(), parseToNameAndArg.getArg(),authCredentials);
+        Request request = new Request(parseToNameAndArg.getName(), parseToNameAndArg.getArg(), authCredentials);
         remote.sendMessage(request);
     }
 

@@ -11,7 +11,7 @@ public class AuthCredentials implements Serializable {
     public AuthCredentials(String login, String password) {
         this.login = login;
         this.password = password;
-        this.newUser =false;
+        this.newUser = false;
     }
 
     public AuthCredentials(String login, String password, boolean newUser) {

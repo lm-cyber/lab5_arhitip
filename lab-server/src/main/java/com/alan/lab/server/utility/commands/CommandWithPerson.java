@@ -9,18 +9,18 @@ import com.alan.lab.server.utility.collectionmanagers.CollectionManager;
 
 public abstract class CommandWithPerson {
     protected final CollectionManager collectionManager;
-    private final SqlUserManager sqlUserManager;
     protected final SqlCollectionManager sqlCollectionManager;
+    private final SqlUserManager sqlUserManager;
 
 
-    protected Long haveUserRights(AuthCredentials authCredentials)
-    {
-        return sqlUserManager.authenticate(authCredentials);
-    }
     public CommandWithPerson(CollectionManager collectionManager, SqlUserManager sqlUserManager, SqlCollectionManager sqlCollectionManager) {
         this.collectionManager = collectionManager;
         this.sqlUserManager = sqlUserManager;
         this.sqlCollectionManager = sqlCollectionManager;
+    }
+
+    protected Long haveUserRights(AuthCredentials authCredentials) {
+        return sqlUserManager.authenticate(authCredentials);
     }
 
     public Response execute(Person person, Long id, Long userID) {

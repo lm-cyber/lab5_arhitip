@@ -4,7 +4,10 @@ import com.alan.lab.common.data.Person;
 import com.alan.lab.common.exceptions.NotMinException;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.OptionalDouble;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.stream.Collectors;
 
@@ -29,9 +32,10 @@ public class CollectionManager {
         passwordIds.clear();
         mainData.clear();
     }
+
     public boolean update(Person person, Long id, Long userID) {
         person.setId(id);
-        person.setOwnerID(userID);;
+        person.setOwnerID(userID);
         removeByID(id, userID);
         ids.add(id);
         passwordIds.add(person.getPassportID());
@@ -64,7 +68,7 @@ public class CollectionManager {
 
     public boolean addMin(Person person, Long userID) throws NotMinException {
         if (getMinHeight() > person.getHeight()) {
-         return    add(person, userID);
+            return add(person, userID);
         } else {
             throw new NotMinException();
         }
@@ -87,7 +91,7 @@ public class CollectionManager {
     public boolean removeByID(Long id, Long userID) {
         if (mainData.stream().anyMatch(x -> x.getId().equals(id))) {
             Person person = mainData.stream().filter(x -> x.getId().equals(id)).findAny().get();
-            if(person.getOwnerID() != userID) {
+            if (person.getOwnerID() != userID) {
                 return false;
             }
             passwordIds.remove(person.getPassportID());
@@ -125,8 +129,9 @@ public class CollectionManager {
     public boolean checkOwner(Long personID, Long userID) {
         return mainData.stream().filter(x -> x.getId().equals(personID)).findAny().get().getOwnerID() == userID;
     }
+
     public Person poll(Long userID) {
-        if(mainData.peek().getOwnerID() != userID) {
+        if (mainData.peek().getOwnerID() != userID) {
             return null;
         }
         return mainData.poll();
@@ -137,6 +142,7 @@ public class CollectionManager {
         return optionHeight.orElse(0F);
 
     }
+
     public List<Person> descending() {
         return this.mainData.stream().sorted().collect(Collectors.toList());
     }
@@ -144,6 +150,7 @@ public class CollectionManager {
     public List<Person> filterGreaterThanHeight(Float height) {
         return this.mainData.stream().filter(person -> person.getHeight() > height).collect(Collectors.toList());
     }
+
     @Override
     public String toString() {
         return mainData.toString();

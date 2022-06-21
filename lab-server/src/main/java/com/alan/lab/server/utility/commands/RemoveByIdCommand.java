@@ -16,7 +16,7 @@ public class RemoveByIdCommand extends Command {
     @Override
     public Response execute(Object arg, Long userID) {
         Response response;
-        if (collectionManager.removeByID((Long) arg,userID)) {
+        if (collectionManager.removeByID((Long) arg, userID)) {
             sqlCollectionManager.remove((Long) arg);
             response = new Response("delete success", false, true);
         } else {

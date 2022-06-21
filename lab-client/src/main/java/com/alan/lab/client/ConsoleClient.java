@@ -27,6 +27,7 @@ public class ConsoleClient {
     private final Logger logger;
     private final NonStandardCommand nonStandardCommandClient;
     private RequestCreator requestCreator;
+
     public ConsoleClient(UserInputManager userInputManager, OutputManager outputManager, InetSocketAddress addr) throws IOException {
         this.userInputManager = userInputManager;
         this.outputManager = outputManager;
@@ -38,7 +39,6 @@ public class ConsoleClient {
         logger.addHandler(fh);
 
     }
-
 
 
     private void responseFormating(Collection list) {
@@ -82,10 +82,10 @@ public class ConsoleClient {
         String input = "";
         while (input != null) {
             try {
-                if(!addCommandAndAuth[1]) {
+                if (!addCommandAndAuth[1]) {
                     authCredentials = connectAuth();
                 }
-                else if (!addCommandAndAuth[0]) {
+                if (!addCommandAndAuth[0]) {
                     input = userInputManager.nextLine();
                 }
                 if (nonStandardCommandClient.execute(input)) {
@@ -130,7 +130,7 @@ public class ConsoleClient {
         while (!auth) {
             try {
                 authCredentials = choseAuth();
-                requestCreator.Auth(authCredentials);
+                requestCreator.auth(authCredentials);
                 auth = responseHandler()[1];
             } catch (NumberFormatException e) {
                 outputManager.println("problem with auth");
@@ -139,6 +139,7 @@ public class ConsoleClient {
         }
         return authCredentials;
     }
+
     private AuthCredentials changeUser() {
         outputManager.print("login :");
         String login = userInputManager.nextLine();
@@ -154,12 +155,12 @@ public class ConsoleClient {
         while (shouldContinue) {
             outputManager.println("reg or log");
             input = userInputManager.nextLine();
-            if("reg".equals(input)) {
-                AuthCredentials credentials =  changeUser();
+            if ("reg".equals(input)) {
+                AuthCredentials credentials = changeUser();
                 credentials.setNewUser(true);
                 return credentials;
             }
-            if("log".equals(input)) {
+            if ("log".equals(input)) {
                 return changeUser();
             }
         }
@@ -207,13 +208,14 @@ public class ConsoleClient {
         outputManager.println("Timed out after " + TIMEOUT + " seconds.");
         return null;
     }
-     private boolean waitForReconnection() {
-         outputManager.println("starting to reconnection");
-         try {
-             run();
-             return true;
-         } catch (IOException e) {
-             return false;
-         }
-     }
+
+    private boolean waitForReconnection() {
+        outputManager.println("starting to reconnection");
+        try {
+            run();
+            return true;
+        } catch (IOException e) {
+            return false;
+        }
+    }
 }

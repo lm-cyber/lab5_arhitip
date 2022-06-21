@@ -13,7 +13,7 @@ public class AddCommand extends CommandWithPerson {
 
     @Override
     public Response execute(Person person, Long id, Long userID) {
-        if (collectionManager.add(person,userID)) {
+        if (collectionManager.add(person, userID)) {
             sqlCollectionManager.add(person);
             return new Response("add success", false, true);
         }
