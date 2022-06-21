@@ -84,6 +84,7 @@ public class ConsoleClient {
             try {
                 if (!addCommandAndAuth[1]) {
                     authCredentials = connectAuth();
+                    addCommandAndAuth[1] = true;
                 }
                 if (!addCommandAndAuth[0]) {
                     input = userInputManager.nextLine();
