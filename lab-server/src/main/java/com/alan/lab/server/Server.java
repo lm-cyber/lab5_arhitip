@@ -22,7 +22,7 @@ public final class Server {
 
         int i = 0;
         if (args.length != ARGSCOUNT) {
-            System.out.println("port pg:5432 studs s352469 file_name passport");
+            System.out.println("port file_name pg:5432 studs s352469 passport");
             return;
         }
         try {
