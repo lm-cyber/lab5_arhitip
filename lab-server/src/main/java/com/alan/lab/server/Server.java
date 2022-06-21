@@ -12,27 +12,19 @@ public final class Server {
     }
 
     public static void main(String[] args) {
-
+        String portS = System.getenv("PORT");
         String fileName = System.getenv("FILENAME");
         String dbHost = System.getenv("DB_HOST");
         String dbName = System.getenv("DB_NAME");
         String dbUser = System.getenv("DB_USER");
         String dbPassword = System.getenv("DB_PASSWORD");
-        if (args.length != 2) {
-            System.out.println("This program needs args.");
-            return;
-        }
 
-        if (!args[0].endsWith(".json")) {
-            System.out.println("This program can only work with .json file.");
-            return;
-        }
         try {
             Integer port;
 
-            ServerInstance serverInstance = new ServerInstance(args[0]);
+            ServerInstance serverInstance = new ServerInstance(fileName, dbHost, dbName, dbUser, dbPassword);
             try {
-                port = Integer.parseInt(args[1]);
+                port = Integer.parseInt(portS);
                 serverInstance.run(port);
             } catch (IllegalArgumentException e) {
                 System.out.println("bat port");

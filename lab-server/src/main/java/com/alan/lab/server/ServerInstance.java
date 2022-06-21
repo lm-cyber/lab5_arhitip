@@ -52,7 +52,7 @@ public class ServerInstance {
     private SqlCollectionManager sqlCollectionManager;
 
 
-    public ServerInstance(String fileName) {
+    public ServerInstance(String fileName, String dbHost, String dbName, String dbUser, String dbPassword) {
         this.collectionManager = new CollectionManager();
         this.fileManager = new FileManager(fileName);
         clients = new CopyOnWriteArraySet<>();
@@ -61,7 +61,7 @@ public class ServerInstance {
         File lf = new File("server.log");
         FileHandler fh = null;
         try {
-            this.connection = DriverManager.getConnection("jdbc:postgresql://localhost:5432/personBD", "void", "");
+            this.connection = DriverManager.getConnection("jdbc:postgresql://" + dbHost + "/" + dbName, dbUser, dbPassword);
             this.sqlCollectionManager = new SqlCollectionManager(connection, logger);
             this.sqlUserManager = new SqlUserManager(connection, logger);
             fh = new FileHandler(lf.getAbsolutePath(), true);
@@ -103,23 +103,6 @@ public class ServerInstance {
                 logger.severe(e.getCause().getMessage());
             }
         }
-    }
-
-    private void sendResponse(Object received, ObjectSocketWrapper client) throws IOException {
-        Request request = (Request) received;
-        responseCreator.addHistory(request.getCommandName() + " " + request.getArgs().toString());
-        logger.info("doing " + request.getCommandName() + " " + request.getArgs().toString());
-        Response response = responseCreator.executeCommand(request.getCommandName(), request.getArgs(), request.getAuthCredentials());
-        client.sendMessage(response);
-        logger.fine("send message");
-    }
-
-    private void sendResponseWithPerson(Object received, ObjectSocketWrapper client) throws IOException {
-        logger.info("request with person");
-        RequestWithPerson requestWithPerson = (RequestWithPerson) received;
-        Response response = responseCreator.executeCommandWithPerson(requestWithPerson.getType(), requestWithPerson.getPerson(),
-                requestWithPerson.getAuthCredentials());
-        client.sendMessage(response);
     }
 
     public void run(int port) throws IOException {
