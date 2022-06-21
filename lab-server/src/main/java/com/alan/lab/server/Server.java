@@ -7,6 +7,7 @@ import java.util.NoSuchElementException;
 
 public final class Server {
 
+    private static final int ARGSCOUNT = 6;
     private Server() {
         throw new UnsupportedOperationException("This is an utility class and can not be instantiated");
     }
@@ -19,14 +20,15 @@ public final class Server {
         String dbUser = System.getenv("DB_USER");
         String dbPassword = System.getenv("DB_PASSWORD"); //сервер не дает переменые окружения задать
 
-        if(args.length != 3) {
-            System.out.println("port file_name passport");
+        int i = 0;
+        if (args.length != ARGSCOUNT) {
+            System.out.println("port pg:5432 studs s352469 file_name passport");
             return;
         }
         try {
             Integer port;
 
-            ServerInstance serverInstance = new ServerInstance(args[1], "pg:5432", "studs", "s352469", args[2]);
+            ServerInstance serverInstance = new ServerInstance(args[++i], args[++i], args[++i], args[++i], args[++i]);
             try {
                 port = Integer.parseInt(args[0]);
                 serverInstance.run(port);
