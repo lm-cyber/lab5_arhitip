@@ -19,6 +19,10 @@ public final class Server {
         String dbUser = System.getenv("DB_USER");
         String dbPassword = System.getenv("DB_PASSWORD"); //сервер не дает переменые окружения задать
 
+        if(args.length != 3) {
+            System.out.println("port file_name passport");
+            return;
+        }
         try {
             Integer port;
 
