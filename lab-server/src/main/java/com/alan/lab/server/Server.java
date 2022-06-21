@@ -12,19 +12,19 @@ public final class Server {
     }
 
     public static void main(String[] args) {
-        String portS = System.getenv("PORT");
+        String portS = System.getenv("PORT_PORT");
         String fileName = System.getenv("FILENAME");
         String dbHost = System.getenv("DB_HOST");
         String dbName = System.getenv("DB_NAME");
         String dbUser = System.getenv("DB_USER");
-        String dbPassword = System.getenv("DB_PASSWORD");
+        String dbPassword = System.getenv("DB_PASSWORD"); //сервер не дает переменые окружения задать
 
         try {
             Integer port;
 
-            ServerInstance serverInstance = new ServerInstance(fileName, dbHost, dbName, dbUser, dbPassword);
+            ServerInstance serverInstance = new ServerInstance(args[1], "pg:5432", "studs", "s352469", args[2]);
             try {
-                port = Integer.parseInt(portS);
+                port = Integer.parseInt(args[0]);
                 serverInstance.run(port);
             } catch (IllegalArgumentException e) {
                 System.out.println("bat port");
