@@ -23,7 +23,6 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
@@ -95,13 +94,13 @@ public class ServerInstance {
                 client.start();
                 client.handleRequests();
             });
-            try {
+            /*try {
                 task.get();
             } catch (InterruptedException e) {
                 logger.severe(e.getMessage());
             } catch (ExecutionException e) {
                 logger.severe(e.getCause().getMessage());
-            }
+            }*/
         }
     }
 
@@ -185,21 +184,21 @@ public class ServerInstance {
                 ForkJoinTask<?> taskSender = responseSenderPool1.submit(() -> {
                     sendTaskResponse(client, response);
                 });
-                try {
+                /*try {
                     taskSender.get();
                 } catch (InterruptedException e) {
                     logger.severe(e.getMessage());
                 } catch (ExecutionException e) {
                     logger.severe(e.getCause().getMessage());
-                }
+                }*/
             });
-            try {
+            /*try {
                 task.get();
             } catch (InterruptedException e) {
                 logger.severe(e.getMessage());
             } catch (ExecutionException e) {
                 logger.severe(e.getCause().getMessage());
-            }
+            }*/
         }
 
         private void sendResponseWithPerson(Object received, ObjectSocketWrapper client) {
@@ -210,21 +209,21 @@ public class ServerInstance {
                 ForkJoinTask<?> taskSender = responseSenderPool1.submit(() -> {
                     sendTaskResponse(client, response);
                 });
-                try {
+                /*try {
                     taskSender.get();
                 } catch (InterruptedException e) {
                     logger.severe(e.getMessage());
                 } catch (ExecutionException e) {
                     logger.severe(e.getCause().getMessage());
-                }
+                }*/
             });
-            try {
+            /*try {
                 task.get();
             } catch (InterruptedException e) {
                 logger.severe(e.getMessage());
             } catch (ExecutionException e) {
                 logger.severe(e.getCause().getMessage());
-            }
+            }*/
         }
         private void sendTaskResponse(ObjectSocketWrapper client, Response response) {
             if (client.sendMessage(response)) {
