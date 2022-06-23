@@ -20,6 +20,6 @@ public class ClearCommand extends  Command {
             collectionManager.clear();
             return new Response("clear success", false, true);
         }
-        return new Response("cat't clear",false,true);
+        return new Response("cat't clear", false, true);
     }
 }

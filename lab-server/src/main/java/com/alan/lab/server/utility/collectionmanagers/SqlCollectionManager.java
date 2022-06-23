@@ -5,7 +5,13 @@ import com.alan.lab.common.data.Coordinates;
 import com.alan.lab.common.data.Location;
 import com.alan.lab.common.data.Person;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Timestamp;
+import java.sql.Types;
 import java.util.Objects;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.logging.Logger;
@@ -205,7 +211,7 @@ public class SqlCollectionManager {
         return  Objects.equals(ownerId, checkOwnerId(id));
     }
     public boolean update(Person person) {
-        if(Objects.equals(person.getOwnerID(), checkOwnerId(person.getId()))) {
+        if (Objects.equals(person.getOwnerID(), checkOwnerId(person.getId()))) {
             final int idOffset = 12;
             String query = "UPDATE person SET "
                     + "name=?, "
@@ -242,7 +248,7 @@ public class SqlCollectionManager {
 
 
     public boolean remove(Long id, Long userId) {
-        if(userId.equals(checkOwnerId(id))) {
+        if (userId.equals(checkOwnerId(id))) {
             String query = "DELETE FROM person WHERE id=?";
 
             try (PreparedStatement s = conn.prepareStatement(query)) {

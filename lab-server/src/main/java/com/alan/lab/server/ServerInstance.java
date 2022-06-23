@@ -21,7 +21,12 @@ import java.net.SocketTimeoutException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.ForkJoinTask;
+import java.util.concurrent.Future;
+import java.util.concurrent.PriorityBlockingQueue;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 
@@ -83,16 +88,6 @@ public class ServerInstance {
             client.start();
             client.handleRequests();
         });
-        try {
-            task.get();
-        } catch (InterruptedException e) {
-            logger.severe(e.getMessage());
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            logger.severe(e.getCause().getMessage());
-            e.printStackTrace();
-            e.getCause().printStackTrace();
-        }
     }
 
     public void run(int port) throws IOException {
@@ -174,27 +169,7 @@ public class ServerInstance {
                 ForkJoinTask<?> taskSender = responseSenderPool1.submit(() -> {
                     sendTaskResponse(client, response);
                 });
-                try {
-                    taskSender.get();
-                } catch (InterruptedException e) {
-                    logger.severe(e.getMessage());
-                    e.printStackTrace();
-                } catch (ExecutionException e) {
-                    logger.severe(e.getCause().getMessage() + e.getMessage());
-                    e.printStackTrace();
-                    e.getCause().printStackTrace();
-                }
             });
-            try {
-                task.get();
-            } catch (InterruptedException e) {
-                logger.severe(e.getMessage());
-                e.printStackTrace();
-            } catch (ExecutionException e) {
-                logger.severe(e.getCause().getMessage() + e.getMessage());
-                e.printStackTrace();
-                e.getCause().printStackTrace();
-            }
         }
 
         private void sendResponseWithPerson(Object received, ObjectSocketWrapper client) {
@@ -205,27 +180,7 @@ public class ServerInstance {
                 ForkJoinTask<?> taskSender = responseSenderPool1.submit(() -> {
                     sendTaskResponse(client, response);
                 });
-                try {
-                    taskSender.get();
-                } catch (InterruptedException e) {
-                    logger.severe(e.getMessage());
-                    e.printStackTrace();
-                } catch (ExecutionException e) {
-                    logger.severe(e.getCause().getMessage() + e.getMessage());
-                    e.printStackTrace();
-                    e.getCause().printStackTrace();
-                }
             });
-            try {
-                task.get();
-            } catch (InterruptedException e) {
-                logger.severe(e.getMessage());
-                e.printStackTrace();
-            } catch (ExecutionException e) {
-                logger.severe(e.getCause().getMessage() + e.getMessage());
-                e.printStackTrace();
-                e.getCause().printStackTrace();
-            }
         }
         private void sendTaskResponse(ObjectSocketWrapper client, Response response) {
             if (client.sendMessage(response)) {
