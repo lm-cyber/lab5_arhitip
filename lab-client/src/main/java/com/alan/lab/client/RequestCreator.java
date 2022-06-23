@@ -16,15 +16,20 @@ public class RequestCreator {
     private final UserInputManager userInputManager;
     private final OutputManager outputManager;
     private RequestWithPersonType type;
+    private Long lastID;
 
     public RequestCreator(ObjectSocketChannelWrapper remote, UserInputManager userInputManager, OutputManager outputManager) {
         this.remote = remote;
         this.userInputManager = userInputManager;
         this.outputManager = outputManager;
+        this.lastID = 0L;
     }
 
     public void requestCreate(String input, boolean[] addCommandAndAuth, AuthCredentials authCredentials) throws IOException {
         ParseToNameAndArg parseToNameAndArg = new ParseToNameAndArg(input);
+        if (parseToNameAndArg.getName().equals("update")) {
+            lastID = (Long) parseToNameAndArg.getArg();
+        }
         if (addCommandAndAuth[0]) {
             sendRequestWithPerson(type, authCredentials);
         } else {
@@ -42,6 +47,7 @@ public class RequestCreator {
     private void sendRequestWithPerson(RequestWithPersonType rType, AuthCredentials authCredentials) throws IOException {
         RequestWithPerson requestWithPerson;
         Person person = AddElem.add(userInputManager, outputManager);
+        person.setId(lastID);
         requestWithPerson = new RequestWithPerson(person, rType, authCredentials);
         remote.sendMessage(requestWithPerson);
     }

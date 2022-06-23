@@ -17,14 +17,13 @@ public class RemoveHeadCommand extends Command {
 
     @Override
     public Response execute(Object arg, Long userID) {
-        Response response;
-        if (collectionManager.isEmpty()) {
-            response = new Response("is empty ,cant remove_head", false, true);
+        if (sqlCollectionManager.isEmpty()) {
+            return new Response("is empty ,cant remove_head", false, true);
         } else {
 
-            Person person = collectionManager.poll(userID);
-            if (person != null) {
-                sqlCollectionManager.remove(person.getId());
+            Person person = collectionManager.peek();
+            if (sqlCollectionManager.remove(person.getId(), userID)) {
+                collectionManager.poll(person.getOwnerID());
                 return new Response(person, false, true);
             }
         }

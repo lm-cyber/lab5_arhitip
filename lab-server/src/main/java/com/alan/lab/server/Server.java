@@ -8,19 +8,17 @@ import java.util.NoSuchElementException;
 public final class Server {
 
     private static final int ARGSCOUNT = 6;
+    private static final int PORTNUM = 0;
+    private static final int FILENAMENUM = 1;
+    private static final int HOSTNAMENUM = 2;
+    private static final int DATABASENAMENUM = 3;
+    private static final int USERDBNAMENUM = 4;
+    private static final int PASSPORTNAMEMUN = 5;
     private Server() {
         throw new UnsupportedOperationException("This is an utility class and can not be instantiated");
     }
 
     public static void main(String[] args) {
-        String portS = System.getenv("PORT_PORT");
-        String fileName = System.getenv("FILENAME");
-        String dbHost = System.getenv("DB_HOST");
-        String dbName = System.getenv("DB_NAME");
-        String dbUser = System.getenv("DB_USER");
-        String dbPassword = System.getenv("DB_PASSWORD"); //сервер не дает переменые окружения задать
-
-        int i = 0;
         if (args.length != ARGSCOUNT) {
             System.out.println("port file_name pg:5432 studs s352469 passport");
             return;
@@ -28,9 +26,9 @@ public final class Server {
         try {
             Integer port;
 
-            ServerInstance serverInstance = new ServerInstance(args[++i], args[++i], args[++i], args[++i], args[++i]);
+            ServerInstance serverInstance = new ServerInstance(args[FILENAMENUM], args[HOSTNAMENUM], args[DATABASENAMENUM], args[USERDBNAMENUM], args[PASSPORTNAMEMUN]);
             try {
-                port = Integer.parseInt(args[0]);
+                port = Integer.parseInt(args[PORTNUM]);
                 serverInstance.run(port);
             } catch (IllegalArgumentException e) {
                 System.out.println("bat port");
@@ -45,43 +43,7 @@ public final class Server {
         }
 
     }
-    /* public static void main1(String[] args) throws IOException {
-        String fileName = System.getenv("FILENAME");
-        String dbHost = System.getenv("DB_HOST");
-        String dbName = System.getenv("DB_NAME");
-        String dbUser = System.getenv("DB_USER");
-        String dbPassword = System.getenv("DB_PASSWORD");
-        int port;
 
-        try {
-            port = Integer.parseInt(args[0]);
-        } catch (ArrayIndexOutOfBoundsException | NumberFormatException e) {
-            System.exit(1);
-            return;
-        }
-
-        // Prioritize SQL
-        if (dbHost != null && dbName != null && dbUser != null && dbPassword != null) {
-            startSQLCollectionServer(port, dbHost, dbName, dbUser, dbPassword);
-        } else {
-            System.exit(1);
-        }
-    }
-
-    private static void startSQLCollectionServer(int port, String dbHost, String dbName, String dbUser, String dbPassword) throws IOException {
-        try (Connection conn = DriverManager.getConnection(
-            "jdbc:postgresql://" + dbHost + '/' + dbName,
-            dbUser,
-            dbPassword
-        )) {
-            // Create users table first
-            SqlUserManager users = new SqlUserManager(conn);
-            ServerInstance server = new ServerInstance(col, users);
-            server.run(port);
-        } catch (SQLException e) {
-            System.exit(1);
-        }
-    }*/
 
 
 }

@@ -5,20 +5,26 @@ import com.alan.lab.common.data.Coordinates;
 import com.alan.lab.common.data.Location;
 import com.alan.lab.common.data.Person;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Timestamp;
-import java.sql.Types;
-import java.util.List;
+import java.sql.*;
+import java.util.Objects;
 import java.util.concurrent.PriorityBlockingQueue;
-import java.util.function.Predicate;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 public class SqlCollectionManager {
+
+    private static final int NAMENUM = 1;
+    private static final int COORDINATES_XNUM = 2;
+    private static final int COORDINATES_YNUM = 3;
+    private static final int CREATION_DATENUM = 4;
+    private static final int HEOGHTNUM = 5;
+    private static final int BIRTHDAYNUM = 6;
+    private static final int PASSPORT_IDNUM = 7;
+    private static final int HAIR_COLORNUM = 8;
+    private static final int LOCATION_XNUM = 9;
+    private static final int LOCATION_YNUM = 10;
+    private static final int LOCATION_ZNUM = 11;
+    private static final int OWNER_IDNUM = 12;
+
     private static final String CREATE_TABLE_QUERY = "CREATE TABLE IF NOT EXISTS person("
             + "   id serial PRIMARY KEY,"
             + "   name varchar(100) NOT NULL,"
@@ -27,7 +33,7 @@ public class SqlCollectionManager {
             + "   creation_date TIMESTAMP NOT NULL,"
             + "   height real,"
             + "   birthday TIMESTAMP NOT NULL,"
-            + "   passport_id varchar(100) NOT NULL,"
+            + "   passport_id varchar(100) NOT NULL UNIQUE,"
             + "   hair_color varchar(20) ,"
             + "   location_x double precision,"
             + "   location_y integer,"
@@ -61,7 +67,7 @@ public class SqlCollectionManager {
                     }
                 }
 
-                logger.info("Loaded " + collection.size() + " routes from DB, removed " + invalidRoutes + " invalid routes.");
+                logger.info("Loaded " + collection.size() + " person from DB, removed " + invalidRoutes + " invalid person.");
             }
         }
     }
@@ -92,34 +98,33 @@ public class SqlCollectionManager {
     }
 
     private void preparePersonStatement(PreparedStatement s, Person person, int paramOffset) throws SQLException {
-        int i = 0;
-        s.setString(paramOffset + ++i, person.getName());
-        s.setFloat(paramOffset + ++i, person.getCoordinates().getX());
-        s.setFloat(paramOffset + ++i, person.getCoordinates().getY());
-        s.setTimestamp(paramOffset + ++i, Timestamp.valueOf(person.getCreationDate()));
+        s.setString(paramOffset + NAMENUM, person.getName());
+        s.setFloat(paramOffset + COORDINATES_XNUM, person.getCoordinates().getX());
+        s.setFloat(paramOffset + COORDINATES_YNUM, person.getCoordinates().getY());
+        s.setTimestamp(paramOffset + CREATION_DATENUM, Timestamp.valueOf(person.getCreationDate()));
         if (person.getHeight() != -1F) {
-            s.setFloat(paramOffset + ++i, person.getHeight());
+            s.setFloat(paramOffset + HEOGHTNUM, person.getHeight());
         } else {
-            s.setNull(paramOffset + ++i, Types.FLOAT);
+            s.setNull(paramOffset + HEOGHTNUM, Types.FLOAT);
         }
 
-        s.setTimestamp(paramOffset + ++i, Timestamp.valueOf(person.getBirthday()));
-        s.setString(paramOffset + ++i, person.getPassportID());
+        s.setTimestamp(paramOffset + BIRTHDAYNUM, Timestamp.valueOf(person.getBirthday()));
+        s.setString(paramOffset + PASSPORT_IDNUM, person.getPassportID());
         if (person.getHairColor() != null) {
-            s.setString(paramOffset + ++i, person.getHairColor().toString());
+            s.setString(paramOffset + HAIR_COLORNUM, person.getHairColor().toString());
         } else {
-            s.setNull(paramOffset + ++i, Types.VARCHAR);
+            s.setNull(paramOffset + HAIR_COLORNUM, Types.VARCHAR);
         }
         if (person.getLocation() != null) {
-            s.setDouble(paramOffset + ++i, person.getLocation().getX());
-            s.setInt(paramOffset + ++i, person.getLocation().getY());
-            s.setLong(paramOffset + ++i, person.getLocation().getZ());
+            s.setDouble(paramOffset + LOCATION_XNUM, person.getLocation().getX());
+            s.setInt(paramOffset + LOCATION_YNUM, person.getLocation().getY());
+            s.setLong(paramOffset + LOCATION_ZNUM, person.getLocation().getZ());
         } else {
-            s.setNull(paramOffset + ++i, Types.DOUBLE);
-            s.setNull(paramOffset + ++i, Types.INTEGER);
-            s.setNull(paramOffset + ++i, Types.BIGINT);
+            s.setNull(paramOffset + LOCATION_XNUM, Types.DOUBLE);
+            s.setNull(paramOffset + LOCATION_YNUM, Types.INTEGER);
+            s.setNull(paramOffset + LOCATION_ZNUM, Types.BIGINT);
         }
-        s.setLong(paramOffset + ++i, person.getOwnerID());
+        s.setLong(paramOffset + OWNER_IDNUM, person.getOwnerID());
     }
 
     public PriorityBlockingQueue<Person> getCollection() {
@@ -130,7 +135,7 @@ public class SqlCollectionManager {
         return collection.stream().filter(x -> x.getId() == id).findFirst().orElse(null);
     }
 
-    public long add(Person person) {
+    public boolean add(Person person) {
         String query = "INSERT INTO person VALUES ("
                 + "    default,?,?,?,?,?,?,?,?,?,?,?,?) RETURNING id";
 
@@ -141,67 +146,119 @@ public class SqlCollectionManager {
                 Long id = res.getLong("id");
                 person.setId(id);
                 collection.add(person);
-                return id;
+                return true;
             }
         } catch (SQLException e) {
             logger.severe("Failed to insert element into DB" + e);
-            return 0;
-        }
-    }
-
-    public boolean update(Person person) {
-        final int idOffset = 12;
-        String query = "UPDATE person SET "
-                + "name=?, "
-                + "coordinates_x=?, "
-                + "coordinates_y=?, "
-                + "creation_date=?, "
-                + "height=?, "
-                + "birthday=?, "
-                + "passport_id=?, "
-                + "hair_color=?, "
-                + "location_x=?, "
-                + "location_y=?, "
-                + "location_z=? "
-                + "WHERE id=?";
-
-        try (PreparedStatement s = conn.prepareStatement(query)) {
-            preparePersonStatement(s, person, 0);
-            s.setLong(idOffset, person.getId());
-            int count = s.executeUpdate();
-            if (count > 0) {
-                collection.removeIf(x -> x.getId() == person.getId());
-                collection.add(person);
-                return true;
-            } else {
-                return false;
-            }
-        } catch (SQLException e) {
-            logger.severe("Failed to update person " + e);
             return false;
         }
     }
+    public Float minHeight() {
+        String query = "SELECT MIN(height) FROM person";
 
-
-    public void remove(long id) {
-        String query = "DELETE FROM person WHERE id=?";
+        try (PreparedStatement s = conn.prepareStatement(query)) {
+            try (ResultSet res = s.executeQuery()) {
+                res.next();
+                return res.getFloat(1);
+            }
+        } catch (SQLException e) {
+            logger.severe("problem" + e);
+            return -1F;
+        }
+    }
+     public Long checkOwnerId(Long id) {
+        String query = "SELECT owner_id FROM person where id = ?";
 
         try (PreparedStatement s = conn.prepareStatement(query)) {
             s.setLong(1, id);
-            s.executeUpdate();
-            collection.removeIf(x -> x.getId() == id);
+            try (ResultSet res = s.executeQuery()) {
+                res.next();
+                return res.getLong(1);
+            }
         } catch (SQLException e) {
-            logger.severe("Failed to delete row" + e);
+            logger.severe("problem" + e);
+            return -1L;
         }
     }
-
-    public int removeIf(Predicate<? super Person> predicate) {
-        List<Long> ids = collection.stream().filter(predicate).map(x -> x.getId()).collect(Collectors.toList());
-        ids.forEach(this::remove);
-        return ids.size();
+    public boolean addIfMin(Person person) {
+        if (person.getHeight() < minHeight()) {
+            return add(person);
+        }
+        return false;
     }
 
-    public void clear() {
+    public boolean isEmpty() {
+        String query = "SELECT COUNT(id) FROM person";
+
+        try (PreparedStatement s = conn.prepareStatement(query)) {
+            try (ResultSet res = s.executeQuery()) {
+                res.next();
+                return res.getLong(1) == 0;
+            }
+        } catch (SQLException e) {
+            logger.severe("problem" + e);
+            return true;
+        }
+
+    }
+    public boolean update(Long id, Long ownerId) {
+        return  Objects.equals(ownerId, checkOwnerId(id));
+    }
+    public boolean update(Person person) {
+        if(Objects.equals(person.getOwnerID(), checkOwnerId(person.getId()))) {
+            final int idOffset = 12;
+            String query = "UPDATE person SET "
+                    + "name=?, "
+                    + "coordinates_x=?, "
+                    + "coordinates_y=?, "
+                    + "creation_date=?, "
+                    + "height=?, "
+                    + "birthday=?, "
+                    + "passport_id=?, "
+                    + "hair_color=?, "
+                    + "location_x=?, "
+                    + "location_y=?, "
+                    + "location_z=? "
+                    + "WHERE id=?";
+
+            try (PreparedStatement s = conn.prepareStatement(query)) {
+                preparePersonStatement(s, person, 0);
+                s.setLong(idOffset, person.getId());
+                int count = s.executeUpdate();
+                if (count > 0) {
+                    collection.removeIf(x -> x.getId() == person.getId());
+                    collection.add(person);
+                    return true;
+                } else {
+                    return false;
+                }
+            } catch (SQLException e) {
+                logger.severe("Failed to update person " + e);
+                return false;
+            }
+        }
+        return false;
+    }
+
+
+    public boolean remove(Long id, Long userId) {
+        if(userId.equals(checkOwnerId(id))) {
+            String query = "DELETE FROM person WHERE id=?";
+
+            try (PreparedStatement s = conn.prepareStatement(query)) {
+                s.setLong(1, id);
+                s.executeUpdate();
+                return true;
+            } catch (SQLException e) {
+                logger.severe("Failed to delete row" + e);
+                return false;
+            }
+        }
+        return false;
+    }
+
+
+    public boolean clear() {
         try (Statement s = conn.createStatement()) {
             boolean prev = conn.getAutoCommit();
             conn.setAutoCommit(false);
@@ -210,12 +267,15 @@ public class SqlCollectionManager {
             conn.commit();
             conn.setAutoCommit(prev);
             collection.clear();
+            return true;
         } catch (SQLException e) {
             try {
                 logger.severe("Failed to clear table, rolling back..." + e);
                 conn.rollback();
+                return false;
             } catch (SQLException e_) {
                 logger.severe("Failed to rollback" + e);
+                return false;
             }
         }
     }

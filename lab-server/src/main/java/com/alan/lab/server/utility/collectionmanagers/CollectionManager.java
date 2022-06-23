@@ -1,22 +1,23 @@
 package com.alan.lab.server.utility.collectionmanagers;
 
 import com.alan.lab.common.data.Person;
-import com.alan.lab.common.exceptions.NotMinException;
 
 import java.time.LocalDate;
-import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalDouble;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.PriorityBlockingQueue;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 public class CollectionManager {
     private PriorityBlockingQueue<Person> mainData;
     private final LocalDate creationDate = LocalDate.now();
-    private HashSet<Long> ids = new HashSet<>();
-    private HashSet<String> passwordIds = new HashSet<>();
-    private Long iterId = 0L;
+    private ConcurrentSkipListSet<Long> ids = new ConcurrentSkipListSet<>();
+    private ConcurrentSkipListSet<String> passwordIds = new ConcurrentSkipListSet<>();
+    private AtomicLong iterId = new AtomicLong(0L); // хотя для 64 бит машин пофиг
 
     public void initialiseData(PriorityBlockingQueue<Person> people) {
         this.mainData = people;
@@ -33,14 +34,12 @@ public class CollectionManager {
         mainData.clear();
     }
 
-    public boolean update(Person person, Long id, Long userID) {
-        person.setId(id);
-        person.setOwnerID(userID);
-        removeByID(id, userID);
-        ids.add(id);
-        passwordIds.add(person.getPassportID());
-        mainData.add(person);
-        return true;
+    public boolean update(Person person) {
+        if (removeByID(person.getId(), person.getOwnerID())) {
+            addWithoutChecks(person);
+            return true;
+        }
+        return false;
     }
 
     public LocalDate getCreationDate() {
@@ -59,47 +58,50 @@ public class CollectionManager {
         return mainData;
     }
 
-    public Long getNewID() {
-        while (ids.contains(iterId)) {
-            iterId++;
+    public AtomicLong getNewID() {
+        while (ids.contains(iterId.get())) {
+            iterId.incrementAndGet();
         }
         return iterId;
     }
 
-    public boolean addMin(Person person, Long userID) throws NotMinException {
+    public boolean addMin(Person person) {
         if (getMinHeight() > person.getHeight()) {
-            return add(person, userID);
-        } else {
-            throw new NotMinException();
+            return add(person);
         }
+        return false;
 
     }
 
-    public boolean add(Person person, Long userID) {
-        if (!isContains(person.getPassportID())) {
-            person.setOwnerID(userID);
-            person.setId(getNewID());
-            ids.add(person.getId());
-            passwordIds.add(person.getPassportID());
-            mainData.add(person);
+    public boolean add(Person person) {
+        if (!isContainsPasswordIds(person.getPassportID())) {
+            person.setId(getNewID().get());
+            addWithoutChecks(person);
             return true;
         }
         return false;
 
+    }
+    private void addWithoutChecks(Person person) {
+        ids.add(person.getId());
+        passwordIds.add(person.getPassportID());
+        mainData.add(person);
     }
 
     public boolean removeByID(Long id, Long userID) {
-        if (mainData.stream().anyMatch(x -> x.getId().equals(id))) {
-            Person person = mainData.stream().filter(x -> x.getId().equals(id)).findAny().get();
-            if (person.getOwnerID() != userID) {
-                return false;
+        Optional<Person> person = mainData.stream().filter(x -> x.getId().equals(id)).findAny();
+        if (person.isPresent()) {
+            if (person.get().getOwnerID().equals(userID)) {
+                remove(person.get());
+                return true;
             }
-            passwordIds.remove(person.getPassportID());
-            mainData.remove(person);
-            removeId(id);
-            return true;
         }
         return false;
+    }
+    private void remove(Person person) {
+        passwordIds.remove(person.getPassportID());
+        ids.remove(person.getId());
+        mainData.remove(person);
     }
 
     public Double averageHeight() {
@@ -110,11 +112,8 @@ public class CollectionManager {
         return average.orElse(0D);
     }
 
-    public void removeId(Long id) {
-        ids.remove(id);
-    }
 
-    public boolean isHaveId(Long id) {
+    public boolean isContainsId(Long id) {
         return ids.contains(id);
     }
 
@@ -122,16 +121,20 @@ public class CollectionManager {
         return mainData.isEmpty();
     }
 
-    public boolean isContains(String passportID) {
+    public boolean isContainsPasswordIds(String passportID) {
         return passwordIds.contains(passportID);
     }
 
     public boolean checkOwner(Long personID, Long userID) {
-        return mainData.stream().filter(x -> x.getId().equals(personID)).findAny().get().getOwnerID() == userID;
+        Optional<Person> person = mainData.stream().filter(x -> x.getId().equals(personID)).findAny();
+        return person.filter(value -> Objects.equals(value.getOwnerID(), userID)).isPresent();
     }
 
+    public  Person peek() {
+        return mainData.peek();
+    }
     public Person poll(Long userID) {
-        if (mainData.peek().getOwnerID() != userID) {
+        if (!Objects.equals(mainData.peek().getOwnerID(), userID)) {
             return null;
         }
         return mainData.poll();

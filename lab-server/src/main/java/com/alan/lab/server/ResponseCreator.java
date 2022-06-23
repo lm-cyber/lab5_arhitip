@@ -36,7 +36,6 @@ public class ResponseCreator {
     private final CollectionManager collectionManager;
     private final HashMap<String, Command> commands;
     private final HashMap<RequestWithPersonType, CommandWithPerson> typeCommand;
-    private Long lastId;
     private final SqlUserManager sqlUserManager;
     private final SqlCollectionManager sqlCollectionManager;
 
@@ -48,9 +47,9 @@ public class ResponseCreator {
         this.sqlUserManager = sqlUserManager;
         this.sqlCollectionManager = sqlCollectionManager;
 
-        typeCommand.put(RequestWithPersonType.ADD, new AddCommand(collectionManager, sqlUserManager, sqlCollectionManager));
-        typeCommand.put(RequestWithPersonType.UPDATE, new UpdateCommand(collectionManager, sqlUserManager, sqlCollectionManager));
-        typeCommand.put(RequestWithPersonType.ADD_IF_MIN, new AddIfMinCommand(collectionManager, sqlUserManager, sqlCollectionManager));
+        typeCommand.put(RequestWithPersonType.ADD, new AddCommand(collectionManager, sqlCollectionManager));
+        typeCommand.put(RequestWithPersonType.UPDATE, new UpdateCommand(collectionManager, sqlCollectionManager));
+        typeCommand.put(RequestWithPersonType.ADD_IF_MIN, new AddIfMinCommand(collectionManager, sqlCollectionManager));
         commands.put("clear", new ClearCommand(collectionManager, sqlCollectionManager));
         commands.put("help", new HelpCommad());
         commands.put("history", new HistoryCommand(historyManager));
@@ -62,7 +61,7 @@ public class ResponseCreator {
         commands.put("remove_by_id", new RemoveByIdCommand(collectionManager, sqlCollectionManager));
         commands.put("remove_head", new RemoveHeadCommand(collectionManager, sqlCollectionManager));
         commands.put("add", new AddCom());
-        commands.put("update", new UpdateCom(collectionManager));
+        commands.put("update", new UpdateCom(collectionManager, sqlCollectionManager));
         commands.put("add_if_min", new AddCom());
         commands.put("reg", new RegisterCommand(sqlUserManager));
         commands.put("log", new LoginCommand(sqlUserManager));
@@ -80,14 +79,12 @@ public class ResponseCreator {
         if (userID == null && !"reg".equals(name)) {
             return new Response("not auth", false, false);
         }
-        if (arg instanceof Long) {
-            lastId = (Long) arg;
-        }
         return commands.getOrDefault(name, new NameHaventCommand()).execute(arg, userID);
     }
 
 
     public Response executeCommandWithPerson(RequestWithPersonType type, Person person, AuthCredentials authCredentials) {
-        return typeCommand.get(type).execute(person, lastId, sqlUserManager.authenticate(authCredentials));
+        person.setOwnerID(sqlUserManager.authenticate(authCredentials));
+        return typeCommand.get(type).execute(person);
     }
 }

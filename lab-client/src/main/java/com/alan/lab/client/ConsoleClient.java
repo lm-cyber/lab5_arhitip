@@ -93,6 +93,11 @@ public class ConsoleClient {
                     continue;
                 }
                 try {
+                    if ("log".equals(input) || "reg".equals(input)) {
+                        authCredentials = connectAuth(input);
+                        addCommandAndAuth[1] = true;
+                        continue;
+                    }
                     requestCreator.requestCreate(input, addCommandAndAuth, authCredentials);
                     addCommandAndAuth = responseHandler();
                 } catch (NumberFormatException e) {
@@ -140,6 +145,21 @@ public class ConsoleClient {
         }
         return authCredentials;
     }
+    private AuthCredentials connectAuth(String input) throws IOException {
+        boolean auth = false;
+        AuthCredentials authCredentials = null;
+        while (!auth) {
+            try {
+                authCredentials = choseAuth(input);
+                requestCreator.auth(authCredentials);
+                auth = responseHandler()[1];
+            } catch (NumberFormatException e) {
+                outputManager.println("problem with auth");
+            }
+            remote.clearInBuffer();
+        }
+        return authCredentials;
+    }
 
     private AuthCredentials changeUser() {
         outputManager.print("login :");
@@ -167,6 +187,18 @@ public class ConsoleClient {
         }
         return null;
     }
+    private AuthCredentials choseAuth(String input) {
+        if ("reg".equals(input)) {
+            AuthCredentials credentials = changeUser();
+            credentials.setNewUser(true);
+            return credentials;
+        }
+        if ("log".equals(input)) {
+            return changeUser();
+        }
+        return null;
+    }
+
 
 
     private boolean connection(SocketChannel socket) {
