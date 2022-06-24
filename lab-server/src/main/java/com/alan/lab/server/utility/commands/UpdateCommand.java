@@ -3,6 +3,7 @@ package com.alan.lab.server.utility.commands;
 import com.alan.lab.common.data.Person;
 import com.alan.lab.common.network.Response;
 import com.alan.lab.server.utility.collectionmanagers.CollectionManager;
+import com.alan.lab.server.utility.collectionmanagers.ResultOfSqlCollectionManager;
 import com.alan.lab.server.utility.collectionmanagers.SqlCollectionManager;
 
 public class UpdateCommand extends CommandWithPerson {
@@ -12,10 +13,11 @@ public class UpdateCommand extends CommandWithPerson {
 
     @Override
     public Response execute(Person person) {
-        if (sqlCollectionManager.update(person)) {
+        ResultOfSqlCollectionManager result = sqlCollectionManager.update(person);
+        if (result.equals(ResultOfSqlCollectionManager.UPDATE_SUCCESS)) {
             collectionManager.update(person);
-            return new Response("add success", false, true);
+            return new Response(result.toString(), false, true);
         }
-        return new Response("contains passport or you not ownerq", false, true);
+        return new Response(result.toString(), false, true);
     }
 }

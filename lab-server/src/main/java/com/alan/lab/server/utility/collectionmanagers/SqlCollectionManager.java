@@ -141,7 +141,7 @@ public class SqlCollectionManager {
         return collection.stream().filter(x -> x.getId() == id).findFirst().orElse(null);
     }
 
-    public boolean add(Person person) {
+    public ResultOfSqlCollectionManager add(Person person) {
         String query = "INSERT INTO person VALUES ("
                 + "    default,?,?,?,?,?,?,?,?,?,?,?,?) RETURNING id";
 
@@ -152,13 +152,14 @@ public class SqlCollectionManager {
                 Long id = res.getLong("id");
                 person.setId(id);
                 collection.add(person);
-                return true;
+                return ResultOfSqlCollectionManager.ADD_SUCCESS;
             }
         } catch (SQLException e) {
             logger.severe("Failed to insert element into DB" + e);
-            return false;
+            return ResultOfSqlCollectionManager.PASSPORT_ID_CONTAINS;
         }
     }
+
     public Float minHeight() {
         String query = "SELECT MIN(height) FROM person";
 
@@ -172,7 +173,8 @@ public class SqlCollectionManager {
             return -1F;
         }
     }
-     public Long checkOwnerId(Long id) {
+
+    public Long checkOwnerId(Long id) {
         String query = "SELECT owner_id FROM person where id = ?";
 
         try (PreparedStatement s = conn.prepareStatement(query)) {
@@ -186,31 +188,34 @@ public class SqlCollectionManager {
             return -1L;
         }
     }
-    public boolean addIfMin(Person person) {
+
+    public ResultOfSqlCollectionManager addIfMin(Person person) {
         if (person.getHeight() < minHeight()) {
             return add(person);
         }
-        return false;
+        return ResultOfSqlCollectionManager.PERSON_NOT_MIN;
     }
 
-    public boolean isEmpty() {
+    public ResultOfSqlCollectionManager isEmpty() {
         String query = "SELECT COUNT(id) FROM person";
 
         try (PreparedStatement s = conn.prepareStatement(query)) {
             try (ResultSet res = s.executeQuery()) {
                 res.next();
-                return res.getLong(1) == 0;
+                return res.getLong(1) == 0 ? ResultOfSqlCollectionManager.IS_EMPTY_TRUE : ResultOfSqlCollectionManager.IS_EMPTY_FALSE;
             }
         } catch (SQLException e) {
             logger.severe("problem" + e);
-            return true;
+            return ResultOfSqlCollectionManager.IS_EMPTY_ERROR;
         }
 
     }
+
     public boolean update(Long id, Long ownerId) {
-        return  Objects.equals(ownerId, checkOwnerId(id));
+        return Objects.equals(ownerId, checkOwnerId(id));
     }
-    public boolean update(Person person) {
+
+    public ResultOfSqlCollectionManager update(Person person) {
         if (Objects.equals(person.getOwnerID(), checkOwnerId(person.getId()))) {
             final int idOffset = 12;
             String query = "UPDATE person SET "
@@ -230,41 +235,35 @@ public class SqlCollectionManager {
             try (PreparedStatement s = conn.prepareStatement(query)) {
                 preparePersonStatement(s, person, 0);
                 s.setLong(idOffset, person.getId());
-                int count = s.executeUpdate();
-                if (count > 0) {
-                    collection.removeIf(x -> x.getId() == person.getId());
-                    collection.add(person);
-                    return true;
-                } else {
-                    return false;
-                }
+                s.executeUpdate();
+                return ResultOfSqlCollectionManager.UPDATE_SUCCESS;
             } catch (SQLException e) {
                 logger.severe("Failed to update person " + e);
-                return false;
+                return ResultOfSqlCollectionManager.UPDATE_ERROR;
             }
         }
-        return false;
+        return ResultOfSqlCollectionManager.UPDATE_NOT_OWNER;
     }
 
 
-    public boolean remove(Long id, Long userId) {
+    public ResultOfSqlCollectionManager remove(Long id, Long userId) {
         if (userId.equals(checkOwnerId(id))) {
             String query = "DELETE FROM person WHERE id=?";
 
             try (PreparedStatement s = conn.prepareStatement(query)) {
                 s.setLong(1, id);
                 s.executeUpdate();
-                return true;
+                return ResultOfSqlCollectionManager.REMOVE_SUCCESS;
             } catch (SQLException e) {
                 logger.severe("Failed to delete row" + e);
-                return false;
+                return ResultOfSqlCollectionManager.REMOVE_ERROR;
             }
         }
-        return false;
+        return ResultOfSqlCollectionManager.REMOVE_NOT_OWNER;
     }
 
 
-    public boolean clear() {
+    public ResultOfSqlCollectionManager clear() {
         try (Statement s = conn.createStatement()) {
             boolean prev = conn.getAutoCommit();
             conn.setAutoCommit(false);
@@ -273,15 +272,15 @@ public class SqlCollectionManager {
             conn.commit();
             conn.setAutoCommit(prev);
             collection.clear();
-            return true;
+            return ResultOfSqlCollectionManager.CLEAR_SUCCESS;
         } catch (SQLException e) {
             try {
                 logger.severe("Failed to clear table, rolling back..." + e);
                 conn.rollback();
-                return false;
+                return ResultOfSqlCollectionManager.CLEAR_ERROR_ROLLBACK;
             } catch (SQLException e_) {
                 logger.severe("Failed to rollback" + e);
-                return false;
+                return ResultOfSqlCollectionManager.CLEAR_ERROR;
             }
         }
     }

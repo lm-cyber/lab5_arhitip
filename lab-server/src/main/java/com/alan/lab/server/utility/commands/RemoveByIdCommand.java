@@ -2,6 +2,7 @@ package com.alan.lab.server.utility.commands;
 
 import com.alan.lab.common.network.Response;
 import com.alan.lab.server.utility.collectionmanagers.CollectionManager;
+import com.alan.lab.server.utility.collectionmanagers.ResultOfSqlCollectionManager;
 import com.alan.lab.server.utility.collectionmanagers.SqlCollectionManager;
 
 public class RemoveByIdCommand extends Command {
@@ -15,13 +16,11 @@ public class RemoveByIdCommand extends Command {
     }
     @Override
     public Response execute(Object arg, Long userID) {
-        Response response;
-        if (sqlCollectionManager.remove((Long) arg, userID)) {
+        ResultOfSqlCollectionManager result = sqlCollectionManager.remove((Long) arg, userID);
+        if (result.equals(ResultOfSqlCollectionManager.REMOVE_SUCCESS)) {
             collectionManager.removeByID((Long) arg, userID);
-            response = new Response("delete success", false, true);
-        } else {
-            response = new Response("havent id", false, true);
+            return new Response(result.toString(), false, true);
         }
-        return response;
+        return new Response(result.toString(), false, true);
     }
 }

@@ -7,7 +7,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalDouble;
-import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
@@ -15,8 +16,8 @@ import java.util.stream.Collectors;
 public class CollectionManager {
     private PriorityBlockingQueue<Person> mainData;
     private final LocalDate creationDate = LocalDate.now();
-    private ConcurrentSkipListSet<Long> ids = new ConcurrentSkipListSet<>();
-    private ConcurrentSkipListSet<String> passwordIds = new ConcurrentSkipListSet<>();
+    private Set<Long> ids = ConcurrentHashMap.newKeySet();
+    private Set<String> passwordIds = ConcurrentHashMap.newKeySet();
     private AtomicLong iterId = new AtomicLong(0L); // хотя для 64 бит машин пофиг
 
     public void initialiseData(PriorityBlockingQueue<Person> people) {
