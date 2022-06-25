@@ -76,7 +76,6 @@ public class CollectionManager {
 
     public boolean add(Person person) {
         if (!isContainsPasswordIds(person.getPassportID())) {
-            person.setId(getNewID().get());
             addWithoutChecks(person);
             return true;
         }
