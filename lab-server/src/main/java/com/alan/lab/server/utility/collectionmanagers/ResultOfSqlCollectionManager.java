@@ -21,5 +21,6 @@ public enum ResultOfSqlCollectionManager {
     CLEAR_ERROR_ROLLBACK,
     CLEAR_ERROR,
 
+    DATE_BASE_DEAD
 
 }

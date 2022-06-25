@@ -42,7 +42,7 @@ public class ServerInstance {
     private final NonStandardCommand nonStandardCommandServer;
     private final ExecutorService responseReceiverPool = Executors.newCachedThreadPool();
     private final ForkJoinPool responseHandlerPool = new ForkJoinPool();
-    private final ForkJoinPool responseSenderPool1 = new ForkJoinPool();
+    private final ForkJoinPool responseSenderPool = new ForkJoinPool();
     private SqlUserManager sqlUserManager;
     private Connection connection;
     private SqlCollectionManager sqlCollectionManager;
@@ -116,6 +116,11 @@ public class ServerInstance {
         }
     }
 
+    void shutDown() {
+        responseReceiverPool.shutdown();
+        responseHandlerPool.shutdown();
+        responseSenderPool.shutdown();
+    }
     private class ClientCashedPool {
         private final ObjectSocketWrapper clientSocket;
         private boolean running = false;
@@ -166,7 +171,7 @@ public class ServerInstance {
             logger.info("doing " + request.getCommandName() + " " + request.getArgs().toString());
             ForkJoinTask<?> task = responseHandlerPool.submit(() -> {
                 Response response = responseCreator.executeCommand(request.getCommandName(), request.getArgs(), request.getAuthCredentials());
-                ForkJoinTask<?> taskSender = responseSenderPool1.submit(() -> {
+                ForkJoinTask<?> taskSender = responseSenderPool.submit(() -> {
                     sendTaskResponse(client, response);
                 });
             });
@@ -177,7 +182,7 @@ public class ServerInstance {
             RequestWithPerson requestWithPerson = (RequestWithPerson) received;
             ForkJoinTask<?> task = responseHandlerPool.submit(() -> {
                 Response response = responseCreator.executeCommandWithPerson(requestWithPerson.getType(), requestWithPerson.getPerson(), requestWithPerson.getAuthCredentials());
-                ForkJoinTask<?> taskSender = responseSenderPool1.submit(() -> {
+                ForkJoinTask<?> taskSender = responseSenderPool.submit(() -> {
                     sendTaskResponse(client, response);
                 });
             });

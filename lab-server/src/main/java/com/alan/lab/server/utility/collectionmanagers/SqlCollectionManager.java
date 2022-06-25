@@ -137,9 +137,6 @@ public class SqlCollectionManager {
         return collection;
     }
 
-    public Person getItemById(long id) {
-        return collection.stream().filter(x -> x.getId() == id).findFirst().orElse(null);
-    }
 
     public ResultOfSqlCollectionManager add(Person person) {
         String query = "INSERT INTO person VALUES ("
@@ -160,38 +157,32 @@ public class SqlCollectionManager {
         }
     }
 
-    public Float minHeight() {
+    public Float minHeight() throws SQLException {
         String query = "SELECT MIN(height) FROM person";
 
-        try (PreparedStatement s = conn.prepareStatement(query)) {
-            try (ResultSet res = s.executeQuery()) {
-                res.next();
-                return res.getFloat(1);
-            }
-        } catch (SQLException e) {
-            logger.severe("problem" + e);
-            return -1F;
-        }
+        PreparedStatement s = conn.prepareStatement(query);
+        ResultSet res = s.executeQuery();
+        res.next();
+        return res.getFloat(1);
     }
 
-    public Long checkOwnerId(Long id) {
+    public Long checkOwnerId(Long id) throws SQLException {
         String query = "SELECT owner_id FROM person where id = ?";
 
-        try (PreparedStatement s = conn.prepareStatement(query)) {
-            s.setLong(1, id);
-            try (ResultSet res = s.executeQuery()) {
-                res.next();
-                return res.getLong(1);
-            }
-        } catch (SQLException e) {
-            logger.severe("problem" + e);
-            return -1L;
-        }
+        PreparedStatement s = conn.prepareStatement(query);
+        s.setLong(1, id);
+        ResultSet res = s.executeQuery();
+        res.next();
+        return res.getLong(1);
     }
 
     public ResultOfSqlCollectionManager addIfMin(Person person) {
-        if (person.getHeight() < minHeight()) {
-            return add(person);
+        try {
+            if (person.getHeight() < minHeight()) {
+                return add(person);
+            }
+        } catch (SQLException e) {
+            return ResultOfSqlCollectionManager.DATE_BASE_DEAD;
         }
         return ResultOfSqlCollectionManager.PERSON_NOT_MIN;
     }
@@ -211,53 +202,61 @@ public class SqlCollectionManager {
 
     }
 
-    public boolean update(Long id, Long ownerId) {
+    public boolean update(Long id, Long ownerId) throws SQLException {
         return Objects.equals(ownerId, checkOwnerId(id));
     }
 
     public ResultOfSqlCollectionManager update(Person person) {
-        if (Objects.equals(person.getOwnerID(), checkOwnerId(person.getId()))) {
-            final int idOffset = 12;
-            String query = "UPDATE person SET "
-                    + "name=?, "
-                    + "coordinates_x=?, "
-                    + "coordinates_y=?, "
-                    + "creation_date=?, "
-                    + "height=?, "
-                    + "birthday=?, "
-                    + "passport_id=?, "
-                    + "hair_color=?, "
-                    + "location_x=?, "
-                    + "location_y=?, "
-                    + "location_z=? "
-                    + "WHERE id=?";
+        try {
+            if (Objects.equals(person.getOwnerID(), checkOwnerId(person.getId()))) {
+                final int idOffset = 12;
+                String query = "UPDATE person SET "
+                        + "name=?, "
+                        + "coordinates_x=?, "
+                        + "coordinates_y=?, "
+                        + "creation_date=?, "
+                        + "height=?, "
+                        + "birthday=?, "
+                        + "passport_id=?, "
+                        + "hair_color=?, "
+                        + "location_x=?, "
+                        + "location_y=?, "
+                        + "location_z=? "
+                        + "WHERE id=?";
 
-            try (PreparedStatement s = conn.prepareStatement(query)) {
-                preparePersonStatement(s, person, 0);
-                s.setLong(idOffset, person.getId());
-                s.executeUpdate();
-                return ResultOfSqlCollectionManager.UPDATE_SUCCESS;
-            } catch (SQLException e) {
-                logger.severe("Failed to update person " + e);
-                return ResultOfSqlCollectionManager.UPDATE_ERROR;
+                try (PreparedStatement s = conn.prepareStatement(query)) {
+                    preparePersonStatement(s, person, 0);
+                    s.setLong(idOffset, person.getId());
+                    s.executeUpdate();
+                    return ResultOfSqlCollectionManager.UPDATE_SUCCESS;
+                } catch (SQLException e) {
+                    logger.severe("Failed to update person " + e);
+                    return ResultOfSqlCollectionManager.UPDATE_ERROR;
+                }
             }
+        } catch (SQLException e) {
+            return ResultOfSqlCollectionManager.DATE_BASE_DEAD;
         }
         return ResultOfSqlCollectionManager.UPDATE_NOT_OWNER;
     }
 
 
     public ResultOfSqlCollectionManager remove(Long id, Long userId) {
-        if (userId.equals(checkOwnerId(id))) {
-            String query = "DELETE FROM person WHERE id=?";
+        try {
+            if (userId.equals(checkOwnerId(id))) {
+                String query = "DELETE FROM person WHERE id=?";
 
-            try (PreparedStatement s = conn.prepareStatement(query)) {
-                s.setLong(1, id);
-                s.executeUpdate();
-                return ResultOfSqlCollectionManager.REMOVE_SUCCESS;
-            } catch (SQLException e) {
-                logger.severe("Failed to delete row" + e);
-                return ResultOfSqlCollectionManager.REMOVE_ERROR;
+                try (PreparedStatement s = conn.prepareStatement(query)) {
+                    s.setLong(1, id);
+                    s.executeUpdate();
+                    return ResultOfSqlCollectionManager.REMOVE_SUCCESS;
+                } catch (SQLException e) {
+                    logger.severe("Failed to delete row" + e);
+                    return ResultOfSqlCollectionManager.REMOVE_ERROR;
+                }
             }
+        } catch (SQLException e) {
+            return ResultOfSqlCollectionManager.DATE_BASE_DEAD;
         }
         return ResultOfSqlCollectionManager.REMOVE_NOT_OWNER;
     }
